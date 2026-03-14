@@ -1,0 +1,13 @@
+[project]
+name = "indoor-pathfinding"
+version = "0.1.0"
+description = "Indoor pathfinding system with SLAM and sensor fusion"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.1",
+    "pydantic>=2.10.4",
+]
