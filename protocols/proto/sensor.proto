@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package indoor_pathfinding.sensor;
+
+// IMU 센서 데이터
+message ImuData {
+  double timestamp = 1;
+  // 가속도 (m/s²)
+  Vector3 linear_acceleration = 2;
+  // 각속도 (rad/s)
+  Vector3 angular_velocity = 3;
+}
+
+// 카메라 프레임
+message CameraFrame {
+  double timestamp = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  // 픽셀 데이터 (RGB)
+  bytes data = 4;
+  CameraIntrinsics intrinsics = 5;
+}
+
+message CameraIntrinsics {
+  double fx = 1;
+  double fy = 2;
+  double cx = 3;
+  double cy = 4;
+}
+
+message Vector3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// 센서 데이터 스트리밍 (클라이언트 → 서버)
+message SensorPacket {
+  double timestamp = 1;
+  oneof payload {
+    ImuData imu = 2;
+    CameraFrame camera = 3;
+  }
+}
+
+// 포즈 결과 (서버 → 클라이언트)
+message PoseResult {
+  double timestamp = 1;
+  Vector3 position = 2;
+  Quaternion orientation = 3;
+  TrackingState state = 4;
+}
+
+message Quaternion {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+enum TrackingState {
+  TRACKING_STATE_UNSPECIFIED = 0;
+  TRACKING_STATE_OK = 1;
+  TRACKING_STATE_LOST = 2;
+  TRACKING_STATE_INITIALIZING = 3;
+}
+
+// gRPC 서비스
+service SensorService {
+  // 센서 데이터를 스트리밍으로 전송하고 포즈 결과를 받음
+  rpc StreamSensor(stream SensorPacket) returns (stream PoseResult);
+}

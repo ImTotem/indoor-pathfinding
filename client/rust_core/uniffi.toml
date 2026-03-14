@@ -1,0 +1,6 @@
+[bindings.swift]
+module_name = "RustCore"
+generate_immutable_records = true
+
+[bindings.kotlin]
+package_name = "com.indoor_pathfinding.rust_core"

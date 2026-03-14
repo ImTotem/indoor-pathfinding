@@ -10,3 +10,15 @@ Thumbs.db
 # Build artifacts
 target/
 build/
+
+# Rust
+Cargo.lock
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Docker
+.docker/

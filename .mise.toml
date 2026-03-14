@@ -1,3 +1,6 @@
 [tools]
 android-sdk = "latest"
 flutter = "latest"
+rust = "latest"
+python = "latest"
+protoc = "latest"

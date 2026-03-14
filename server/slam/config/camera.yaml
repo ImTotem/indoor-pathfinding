@@ -1,0 +1,30 @@
+# ORB-SLAM3 카메라 설정 (Pinhole 모델)
+# TODO: 실제 디바이스 캘리브레이션 값으로 교체
+
+Camera:
+  type: "PinHole"
+  fx: 458.654
+  fy: 457.296
+  cx: 367.215
+  cy: 248.375
+
+  # 왜곡 계수 (k1, k2, p1, p2, k3)
+  k1: -0.28340811
+  k2: 0.07395907
+  p1: 0.00019359
+  p2: 0.00001762
+  k3: 0.0
+
+  width: 752
+  height: 480
+  fps: 20
+
+ORBextractor:
+  nFeatures: 1200
+  scaleFactor: 1.2
+  nLevels: 8
+  iniThFAST: 20
+  minThFAST: 7
+
+Viewer:
+  useViewer: false
