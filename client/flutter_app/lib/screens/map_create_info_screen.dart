@@ -1,10 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../api/map_api.dart';
 import '../theme/app_theme.dart';
 
-class MapCreateInfoScreen extends StatelessWidget {
+class MapCreateInfoScreen extends StatefulWidget {
   const MapCreateInfoScreen({super.key});
+
+  @override
+  State<MapCreateInfoScreen> createState() => _MapCreateInfoScreenState();
+}
+
+class _MapCreateInfoScreenState extends State<MapCreateInfoScreen> {
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
+  final _mapApi = MapApi();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await _mapApi.create(
+        name: name,
+        description: _descController.text.trim().isEmpty
+            ? null
+            : _descController.text.trim(),
+        latitude: double.tryParse(_latController.text),
+        longitude: double.tryParse(_lngController.text),
+      );
+      if (mounted) {
+        Navigator.pushNamed(context, '/map-create-camera');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('맵 생성 실패: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +96,12 @@ class MapCreateInfoScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildLabel(c, '건물 이름 *'),
             const SizedBox(height: 8),
-            _buildTextField(c, '건물 이름을 입력해주세요'),
+            _buildTextField(c, '건물 이름을 입력해주세요', _nameController),
             const SizedBox(height: 16),
             _buildLabel(c, '건물에 대한 설명'),
             const SizedBox(height: 8),
-            _buildTextArea(c, '건물에 대한 간단한 설명을 입력해주세요'),
+            _buildTextArea(c, '건물에 대한 간단한 설명을 입력해주세요', _descController),
             const SizedBox(height: 16),
-            // GPS 위치 찾기 버튼
             Container(
               width: double.infinity,
               height: 46,
@@ -77,12 +126,11 @@ class MapCreateInfoScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // 좌표 입력
             Row(
               children: [
-                Expanded(child: _buildCoordField(c, '위도 (Latitude)')),
+                Expanded(child: _buildCoordField(c, '위도 (Latitude)', _latController)),
                 const SizedBox(width: 10),
-                Expanded(child: _buildCoordField(c, '경도 (Longitude)')),
+                Expanded(child: _buildCoordField(c, '경도 (Longitude)', _lngController)),
               ],
             ),
             const SizedBox(height: 16),
@@ -90,8 +138,7 @@ class MapCreateInfoScreen extends StatelessWidget {
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/map-create-camera'),
+                onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: c.accentIndigo,
                   foregroundColor: c.onAccent,
@@ -100,10 +147,16 @@ class MapCreateInfoScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  '다음 화면으로',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text(
+                        '다음 화면으로',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      ),
               ),
             ),
             const SizedBox(height: 24),
@@ -124,8 +177,9 @@ class MapCreateInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(AppColorsExtension c, String hint) {
+  Widget _buildTextField(AppColorsExtension c, String hint, TextEditingController controller) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(fontSize: 13, color: c.textTertiary),
@@ -149,8 +203,9 @@ class MapCreateInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCoordField(AppColorsExtension c, String hint) {
+  Widget _buildCoordField(AppColorsExtension c, String hint, TextEditingController controller) {
     return TextField(
+      controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.\-]')),
@@ -178,8 +233,9 @@ class MapCreateInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextArea(AppColorsExtension c, String hint) {
+  Widget _buildTextArea(AppColorsExtension c, String hint, TextEditingController controller) {
     return TextField(
+      controller: controller,
       maxLines: 3,
       decoration: InputDecoration(
         hintText: hint,

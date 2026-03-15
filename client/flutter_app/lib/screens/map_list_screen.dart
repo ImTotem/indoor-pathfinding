@@ -1,33 +1,8 @@
 import 'package:flutter/material.dart';
+import '../api/map_api.dart';
+import '../models/map_model.dart';
 import '../theme/app_theme.dart';
 import '../widgets/map_card.dart';
-
-class _MapData {
-  final String name;
-  final String description;
-  final String latitude;
-  final String longitude;
-  final String createdAt;
-
-  const _MapData({
-    required this.name,
-    required this.description,
-    required this.latitude,
-    required this.longitude,
-    required this.createdAt,
-  });
-}
-
-const _mockMaps = [
-  _MapData(name: '관리관 A동', description: '본관 1~4층, 북문 주출입구', latitude: '37.5665', longitude: '126.9780', createdAt: '2026-03-13'),
-  _MapData(name: '공학관 B동', description: '지하1층~지상5층, 동문 접근', latitude: '좌표 정보 없음', longitude: '좌표 정보 없음', createdAt: '2026-03-11'),
-  _MapData(name: '도서관 C동', description: '지상3층, 열람실 및 스터디룸', latitude: '37.5670', longitude: '126.9785', createdAt: '2026-03-10'),
-  _MapData(name: '학생회관', description: '지하1층~지상4층, 식당 및 편의시설', latitude: '37.5660', longitude: '126.9775', createdAt: '2026-03-09'),
-  _MapData(name: '체육관', description: '지상2층, 실내 체육시설', latitude: '37.5655', longitude: '126.9790', createdAt: '2026-03-08'),
-  _MapData(name: '기숙사 D동', description: '지상10층, 남학생 기숙사', latitude: '37.5680', longitude: '126.9770', createdAt: '2026-03-07'),
-  _MapData(name: '연구동 E동', description: '지상6층, 연구실 및 세미나실', latitude: '37.5675', longitude: '126.9795', createdAt: '2026-03-06'),
-  _MapData(name: '예술관 F동', description: '지상3층, 전시실 및 강의실', latitude: '좌표 정보 없음', longitude: '좌표 정보 없음', createdAt: '2026-03-05'),
-];
 
 class MapListScreen extends StatefulWidget {
   const MapListScreen({super.key});
@@ -40,6 +15,9 @@ class _MapListScreenState extends State<MapListScreen> {
   int? _selectedIndex;
   final ScrollController _scrollController = ScrollController();
   final ValueNotifier<double> _scrollOffset = ValueNotifier(0.0);
+  final _mapApi = MapApi();
+
+  late Future<List<MapModel>> _mapsFuture;
 
   @override
   void initState() {
@@ -47,6 +25,7 @@ class _MapListScreenState extends State<MapListScreen> {
     _scrollController.addListener(() {
       _scrollOffset.value = _scrollController.offset;
     });
+    _mapsFuture = _mapApi.getAll();
   }
 
   @override
@@ -67,7 +46,7 @@ class _MapListScreenState extends State<MapListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 고정 헤더 영역 - ValueListenableBuilder로 스크롤 시에만 리빌드
+            // 고정 헤더 영역
             ValueListenableBuilder<double>(
               valueListenable: _scrollOffset,
               builder: (context, offset, _) {
@@ -89,7 +68,6 @@ class _MapListScreenState extends State<MapListScreen> {
                         height: 36,
                         child: Stack(
                           children: [
-                            // 펼쳐진 상태: ← 맵 목록 조회
                             Opacity(
                               opacity: headerOpacity,
                               child: GestureDetector(
@@ -111,7 +89,6 @@ class _MapListScreenState extends State<MapListScreen> {
                                 ),
                               ),
                             ),
-                            // 접힌 상태: ← 뒤로가기
                             if (collapsed)
                               Opacity(
                                 opacity: collapsedOpacity,
@@ -137,7 +114,6 @@ class _MapListScreenState extends State<MapListScreen> {
                           ],
                         ),
                       ),
-                      // 설명 텍스트 (접히면 사라짐)
                       ClipRect(
                         child: Align(
                           alignment: Alignment.topLeft,
@@ -167,56 +143,97 @@ class _MapListScreenState extends State<MapListScreen> {
             ),
             // 스크롤 가능한 컨텐츠
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                itemCount: _mockMaps.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
+              child: FutureBuilder<List<MapModel>>(
+                future: _mapsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: c.surfaceAlt,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              '총 ${_mockMaps.length}개 맵',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: c.accentIndigo,
-                              ),
-                            ),
+                          Text(
+                            '맵 목록을 불러올 수 없습니다',
+                            style: TextStyle(color: c.textSecondary),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _mapsFuture = _mapApi.getAll();
+                              });
+                            },
+                            child: const Text('다시 시도'),
                           ),
                         ],
                       ),
                     );
                   }
-                  final mapIndex = index - 1;
-                  final map = _mockMaps[mapIndex];
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: mapIndex < _mockMaps.length - 1 ? 10 : 0,
-                    ),
-                    child: MapCard(
-                      name: map.name,
-                      description: map.description,
-                      latitude: map.latitude,
-                      longitude: map.longitude,
-                      createdAt: map.createdAt,
-                      isSelected: _selectedIndex == mapIndex,
-                      onTap: () => setState(() {
-                        _selectedIndex =
-                            _selectedIndex == mapIndex ? null : mapIndex;
-                      }),
-                    ),
+
+                  final maps = snapshot.data!;
+                  if (maps.isEmpty) {
+                    return Center(
+                      child: Text(
+                        '생성된 맵이 없습니다',
+                        style: TextStyle(color: c.textSecondary),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    itemCount: maps.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: c.surfaceAlt,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  '총 ${maps.length}개 맵',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: c.accentIndigo,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      final mapIndex = index - 1;
+                      final map = maps[mapIndex];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: mapIndex < maps.length - 1 ? 10 : 0,
+                        ),
+                        child: MapCard(
+                          name: map.name,
+                          description: map.description ?? '',
+                          latitude: map.latitudeText,
+                          longitude: map.longitudeText,
+                          createdAt: map.createdAtText,
+                          isSelected: _selectedIndex == mapIndex,
+                          onTap: () => setState(() {
+                            _selectedIndex =
+                                _selectedIndex == mapIndex ? null : mapIndex;
+                          }),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
