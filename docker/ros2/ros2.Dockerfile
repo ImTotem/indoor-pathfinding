@@ -32,7 +32,7 @@ RUN cd protocols/rust && cargo build --release
 
 COPY server/gateway/ ./server/gateway/
 RUN . /opt/ros/humble/setup.sh && \
-    cd server/gateway && cargo build --release --features ros2
+    RUST_MIN_STACK=33554432 cd server/gateway && cargo build --release --features ros2
 
 RUN cp /workspace/server/gateway/target/release/gateway /usr/local/bin/ && \
     rm -rf /workspace/server/gateway/target

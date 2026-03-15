@@ -17,19 +17,16 @@ pub fn init_engine(server_endpoint: String) {
     RustCoreEngine::init(server_endpoint);
 }
 
-/// 매핑 세션 시작 — gRPC SessionService.Start + MappingService.StreamMapping 오픈
+/// 매핑 세션 시작 — 서버가 session_id 생성
 #[uniffi::export]
-pub fn start_mapping_session(session_id: String, map_id: String) -> Result<(), RustCoreError> {
-    RustCoreEngine::get().start_mapping_session(session_id, map_id)
+pub fn start_mapping_session(map_id: String) -> Result<(), RustCoreError> {
+    RustCoreEngine::get().start_mapping_session(map_id)
 }
 
-/// Localization 세션 시작 — gRPC SessionService.Start + LocalizationService.Localize 오픈
+/// Localization 세션 시작 — 서버가 session_id 생성
 #[uniffi::export]
-pub fn start_localization_session(
-    session_id: String,
-    map_id: String,
-) -> Result<(), RustCoreError> {
-    RustCoreEngine::get().start_localization_session(session_id, map_id)
+pub fn start_localization_session(map_id: String) -> Result<(), RustCoreError> {
+    RustCoreEngine::get().start_localization_session(map_id)
 }
 
 /// 현재 세션 종료 — gRPC 스트림 닫기 + SessionService.Stop

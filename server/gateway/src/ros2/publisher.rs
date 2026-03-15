@@ -46,10 +46,9 @@ impl Ros2Publisher {
         Ok(Self { tx })
     }
 
-    pub fn create_session_publishers(&self, prefix: &str, session_type: SessionType) {
-        let session_id = prefix.rsplit('/').next().unwrap_or(prefix).to_string();
+    pub fn create_session_publishers(&self, session_id: &str, prefix: &str, session_type: SessionType) {
         let _ = self.tx.send(PublishCommand::CreateSession {
-            session_id,
+            session_id: session_id.to_string(),
             prefix: prefix.to_string(),
             session_type,
         });

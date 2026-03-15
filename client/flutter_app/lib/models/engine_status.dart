@@ -49,6 +49,8 @@ class EngineStatus {
   final SessionState state;
   final PoseResult? pose;
   final int frameCount;
+  final int totalPushed;
+  final bool queueFull;
   final String? errorMessage;
   // IMU
   final List<double>? accel; // [ax, ay, az]
@@ -60,6 +62,8 @@ class EngineStatus {
     required this.state,
     this.pose,
     required this.frameCount,
+    this.totalPushed = 0,
+    this.queueFull = false,
     this.errorMessage,
     this.accel,
     this.gyro,
@@ -73,6 +77,8 @@ class EngineStatus {
           ? PoseResult.fromMap(map['pose'] as Map<dynamic, dynamic>)
           : null,
       frameCount: (map['frameCount'] as num?)?.toInt() ?? 0,
+      totalPushed: (map['totalPushed'] as num?)?.toInt() ?? 0,
+      queueFull: map['queueFull'] as bool? ?? false,
       errorMessage: map['errorMessage'] as String?,
       accel: (map['accel'] as List?)?.map((e) => (e as num).toDouble()).toList(),
       gyro: (map['gyro'] as List?)?.map((e) => (e as num).toDouble()).toList(),

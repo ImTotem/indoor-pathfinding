@@ -34,6 +34,17 @@ class MainActivity : FlutterActivity() {
 
         val messenger = flutterEngine.dartExecutor.binaryMessenger
 
+        // display rotation 조회
+        MethodChannel(messenger, "com.example.indoor_pathfinding/orientation")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "getRotation") {
+                    @Suppress("DEPRECATION")
+                    result.success(windowManager.defaultDisplay.rotation)
+                } else {
+                    result.notImplemented()
+                }
+            }
+
         // 디바이스 물리 방향 (가속도 기반, 자동회전 설정 무관)
         EventChannel(messenger, "com.example.indoor_pathfinding/device_orientation")
             .setStreamHandler(object : EventChannel.StreamHandler {

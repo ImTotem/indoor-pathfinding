@@ -8557,6 +8557,2134 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "XwQOB",
+      "x": 2314,
+      "y": -589,
+      "name": "Map Create - Camera - 업로드 모달",
+      "theme": {
+        "mode": "light"
+      },
+      "width": 874,
+      "height": 402,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "S7dPX",
+          "x": 0,
+          "y": 0,
+          "name": "wrap",
+          "width": 874,
+          "height": 402,
+          "children": [
+            {
+              "type": "frame",
+              "id": "a8cCz",
+              "name": "preview",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#020617",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0F172A",
+                    "position": 0.55
+                  },
+                  {
+                    "color": "#1E293B",
+                    "position": 1
+                  }
+                ]
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                12,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "8l9J5",
+                  "name": "topRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "tmAlf",
+                      "name": "topBadge",
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "gap": 6,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "M1bTZ",
+                          "name": "recordStateDot",
+                          "fill": "#FFFFFF66",
+                          "width": 8,
+                          "height": 8
+                        },
+                        {
+                          "type": "frame",
+                          "id": "6m1T9",
+                          "name": "metaWrap1",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "EaSLV",
+                              "name": "mode",
+                              "fill": "#FFFFFF",
+                              "content": "오른손 모드",
+                              "lineHeight": 1.25,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "3ahse",
+                      "name": "exitBtn",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "hkiVL",
+                          "name": "exitIcon",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "close",
+                          "iconFontFamily": "Material Symbols Rounded",
+                          "weight": 500,
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ybLF1",
+                  "name": "previewSpacer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical"
+                },
+                {
+                  "type": "frame",
+                  "id": "tFQKZ",
+                  "name": "sideLayer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "padding": [
+                    0,
+                    8,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "5iWc5",
+                      "name": "rightStack",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "N8PFm",
+                          "name": "recordWrap",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "KLU3D",
+                              "name": "recordBtn",
+                              "width": 78,
+                              "height": 78,
+                              "fill": "#FFFFFFF0",
+                              "cornerRadius": 39,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#FFFFFF66"
+                              },
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "BMA2V",
+                                  "name": "recordInner",
+                                  "width": 62,
+                                  "height": 62,
+                                  "fill": "$accentCoral",
+                                  "cornerRadius": 31,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "ZymWI",
+                                      "fill": "$onAccent",
+                                      "width": 24,
+                                      "height": 24
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iCdZq",
+                          "name": "indicatorToggle",
+                          "context": "인디케이터 토글",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#FFFFFF1F",
+                          "cornerRadius": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF2E"
+                          },
+                          "effect": {
+                            "type": "background_blur",
+                            "radius": 8
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "I3WGW",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "gauge",
+                              "iconFontFamily": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Pc0Rt",
+                  "name": "hudDock",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IorjL",
+                      "name": "hudCompact",
+                      "width": 176,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        7,
+                        9
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Jr9fK",
+                          "name": "row1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "VJ41P",
+                              "fill": "#FFFFFF",
+                              "content": "FPS 29.8",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "oSRmg",
+                              "fill": "#FFFFFF",
+                              "content": "통신 41ms",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "8kJld",
+                          "name": "row2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "4VN1o",
+                              "fill": "#FFFFFFCC",
+                              "content": "IMU a(x,y,z): 0.03, -0.01, 9.79",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "16jHd",
+                              "fill": "#FFFFFFCC",
+                              "content": "Gyro r/p/y: 0.12, -0.04, 1.31",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "opmU2",
+          "x": 0,
+          "y": 0,
+          "name": "modalOverlay",
+          "width": 874,
+          "height": 402,
+          "fill": "#00000099",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Nf4lY",
+              "name": "modalDialog",
+              "width": 300,
+              "fill": "$--card",
+              "cornerRadius": 16,
+              "stroke": {
+                "thickness": 1,
+                "fill": "$--border"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 32,
+                "spread": 4
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "7zeOw",
+                  "name": "iconWrap",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "$surfaceAlt",
+                  "cornerRadius": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "UgWmg",
+                      "name": "iconClose",
+                      "width": 24,
+                      "height": 24,
+                      "iconFontName": "cloud_upload",
+                      "iconFontFamily": "Material Symbols Rounded",
+                      "fill": "$accentIndigo"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "CiIXX",
+                  "name": "titleText",
+                  "fill": "$--card-foreground",
+                  "content": "데이터 업로드 중...",
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "nMsoC",
+                  "name": "descText",
+                  "fill": "$--muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 240,
+                  "content": "큐에 남은 센서 데이터를\n서버로 전송하고 있습니다.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 13
+                },
+                {
+                  "type": "frame",
+                  "id": "AkGY7",
+                  "name": "progressSection",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "SQOqq",
+                      "name": "progressInfo",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "aoIMK",
+                          "fill": "$--muted-foreground",
+                          "content": "업로드 진행률",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "t1pB1",
+                          "fill": "$--card-foreground",
+                          "content": "67%",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OBDv1",
+                      "name": "progressBarTrack",
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$--secondary",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "YVrSB",
+                          "x": 0,
+                          "y": 0,
+                          "name": "progressBarFill",
+                          "fill": "$accentIndigo",
+                          "width": 169,
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "0Fu75",
+                      "fill": "$--muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "23 / 34 프레임 전송 완료",
+                      "textAlign": "center",
+                      "fontFamily": "$--font-secondary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Hb4Gv",
+      "x": 5648,
+      "y": -589,
+      "name": "Map Create - Camera - 업로드 모달 (Dark)",
+      "theme": {
+        "mode": "dark",
+        "Mode": "Dark"
+      },
+      "width": 874,
+      "height": 402,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "XSsdN",
+          "x": 0,
+          "y": 0,
+          "name": "wrap",
+          "width": 874,
+          "height": 402,
+          "children": [
+            {
+              "type": "frame",
+              "id": "uUJQH",
+              "name": "preview",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#020617",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0F172A",
+                    "position": 0.55
+                  },
+                  {
+                    "color": "#1E293B",
+                    "position": 1
+                  }
+                ]
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                12,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wllKi",
+                  "name": "topRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pzvDj",
+                      "name": "topBadge",
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "gap": 6,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "OFHFK",
+                          "name": "recordStateDot",
+                          "fill": "#FFFFFF66",
+                          "width": 8,
+                          "height": 8
+                        },
+                        {
+                          "type": "frame",
+                          "id": "DmuB7",
+                          "name": "metaWrap1",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Xmvpo",
+                              "name": "mode",
+                              "fill": "#FFFFFF",
+                              "content": "오른손 모드",
+                              "lineHeight": 1.25,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "4CWb6",
+                      "name": "exitBtn",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "5eiFv",
+                          "name": "exitIcon",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "close",
+                          "iconFontFamily": "Material Symbols Rounded",
+                          "weight": 500,
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "H86zX",
+                  "name": "previewSpacer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical"
+                },
+                {
+                  "type": "frame",
+                  "id": "sgZ9r",
+                  "name": "sideLayer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "padding": [
+                    0,
+                    8,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "0F1Gx",
+                      "name": "rightStack",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "KXIRF",
+                          "name": "recordWrap",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "3sIw8",
+                              "name": "recordBtn",
+                              "width": 78,
+                              "height": 78,
+                              "fill": "#FFFFFFF0",
+                              "cornerRadius": 39,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#FFFFFF66"
+                              },
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "RL2GX",
+                                  "name": "recordInner",
+                                  "width": 62,
+                                  "height": 62,
+                                  "fill": "$accentCoral",
+                                  "cornerRadius": 31,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "OjfNq",
+                                      "fill": "$onAccent",
+                                      "width": 24,
+                                      "height": 24
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p09Z5",
+                          "name": "indicatorToggle",
+                          "context": "인디케이터 토글",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#FFFFFF1F",
+                          "cornerRadius": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF2E"
+                          },
+                          "effect": {
+                            "type": "background_blur",
+                            "radius": 8
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "DHSB8",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "gauge",
+                              "iconFontFamily": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hKGHS",
+                  "name": "hudDock",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "W9Pu0",
+                      "name": "hudCompact",
+                      "width": 176,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        7,
+                        9
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "tfugN",
+                          "name": "row1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "QX68X",
+                              "fill": "#FFFFFF",
+                              "content": "FPS 29.8",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "GRumm",
+                              "fill": "#FFFFFF",
+                              "content": "통신 41ms",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UKyFX",
+                          "name": "row2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eW4Py",
+                              "fill": "#FFFFFFCC",
+                              "content": "IMU a(x,y,z): 0.03, -0.01, 9.79",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "snbAs",
+                              "fill": "#FFFFFFCC",
+                              "content": "Gyro r/p/y: 0.12, -0.04, 1.31",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Kz8yi",
+          "x": 0,
+          "y": 0,
+          "name": "modalOverlay",
+          "width": 874,
+          "height": 402,
+          "fill": "#00000099",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "KIFRU",
+              "name": "modalDialog",
+              "width": 300,
+              "fill": "$--card",
+              "cornerRadius": 16,
+              "stroke": {
+                "thickness": 1,
+                "fill": "$--border"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 32,
+                "spread": 4
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ptms8",
+                  "name": "iconWrap",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "$surfaceAlt",
+                  "cornerRadius": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "chlQt",
+                      "name": "iconClose",
+                      "width": 24,
+                      "height": 24,
+                      "iconFontName": "cloud_upload",
+                      "iconFontFamily": "Material Symbols Rounded",
+                      "fill": "$accentIndigo"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "PbFbm",
+                  "name": "titleText",
+                  "fill": "$--card-foreground",
+                  "content": "데이터 업로드 중...",
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "XbXSF",
+                  "name": "descText",
+                  "fill": "$--muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 240,
+                  "content": "큐에 남은 센서 데이터를\n서버로 전송하고 있습니다.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 13
+                },
+                {
+                  "type": "frame",
+                  "id": "HfPks",
+                  "name": "progressSection",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HAfZY",
+                      "name": "progressInfo",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lOuvM",
+                          "fill": "$--muted-foreground",
+                          "content": "업로드 진행률",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "3CTG2",
+                          "fill": "$--card-foreground",
+                          "content": "67%",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "76hRH",
+                      "name": "progressBarTrack",
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$--secondary",
+                      "cornerRadius": 4,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "r1iBM",
+                          "x": 0,
+                          "y": 0,
+                          "name": "progressBarFill",
+                          "fill": "$accentIndigo",
+                          "width": 169,
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "KsHoi",
+                      "fill": "$--muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "23 / 34 프레임 전송 완료",
+                      "textAlign": "center",
+                      "fontFamily": "$--font-secondary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "4CeT6",
+      "x": 458,
+      "y": -589,
+      "name": "Map Create - Camera - 큐 대기 모달",
+      "theme": {
+        "mode": "light"
+      },
+      "width": 874,
+      "height": 402,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "iAZDl",
+          "x": 0,
+          "y": 0,
+          "name": "wrap",
+          "width": 874,
+          "height": 402,
+          "children": [
+            {
+              "type": "frame",
+              "id": "t8kGM",
+              "name": "preview",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#020617",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0F172A",
+                    "position": 0.55
+                  },
+                  {
+                    "color": "#1E293B",
+                    "position": 1
+                  }
+                ]
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                12,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JYbEb",
+                  "name": "topRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "MrnD4",
+                      "name": "topBadge",
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "gap": 6,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "C6yGK",
+                          "name": "recordStateDot",
+                          "fill": "#FFFFFF66",
+                          "width": 8,
+                          "height": 8
+                        },
+                        {
+                          "type": "frame",
+                          "id": "rcWxW",
+                          "name": "metaWrap1",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ioEeN",
+                              "name": "mode",
+                              "fill": "#FFFFFF",
+                              "content": "오른손 모드",
+                              "lineHeight": 1.25,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U3k8R",
+                      "name": "exitBtn",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "Nq9QV",
+                          "name": "exitIcon",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "close",
+                          "iconFontFamily": "Material Symbols Rounded",
+                          "weight": 500,
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LerjW",
+                  "name": "previewSpacer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical"
+                },
+                {
+                  "type": "frame",
+                  "id": "jFobI",
+                  "name": "sideLayer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "padding": [
+                    0,
+                    8,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WqS5L",
+                      "name": "rightStack",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "1bmZV",
+                          "name": "recordWrap",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "TZ9Jb",
+                              "name": "recordBtn",
+                              "width": 78,
+                              "height": 78,
+                              "fill": "#FFFFFFF0",
+                              "cornerRadius": 39,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#FFFFFF66"
+                              },
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "Y1Dxm",
+                                  "name": "recordInner",
+                                  "width": 62,
+                                  "height": 62,
+                                  "fill": "$accentCoral",
+                                  "cornerRadius": 31,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "awxLa",
+                                      "fill": "$onAccent",
+                                      "width": 24,
+                                      "height": 24
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ntpY2",
+                          "name": "indicatorToggle",
+                          "context": "인디케이터 토글",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#FFFFFF1F",
+                          "cornerRadius": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF2E"
+                          },
+                          "effect": {
+                            "type": "background_blur",
+                            "radius": 8
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "wzt1H",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "gauge",
+                              "iconFontFamily": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DWL8A",
+                  "name": "hudDock",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "F8ck2",
+                      "name": "hudCompact",
+                      "width": 176,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        7,
+                        9
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "7aiHk",
+                          "name": "row1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sePK3",
+                              "fill": "#FFFFFF",
+                              "content": "FPS 29.8",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "eix1k",
+                              "fill": "#FFFFFF",
+                              "content": "통신 41ms",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "3PU7Z",
+                          "name": "row2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JyY8E",
+                              "fill": "#FFFFFFCC",
+                              "content": "IMU a(x,y,z): 0.03, -0.01, 9.79",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "x5kDv",
+                              "fill": "#FFFFFFCC",
+                              "content": "Gyro r/p/y: 0.12, -0.04, 1.31",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "1Z4kU",
+          "x": 0,
+          "y": 0,
+          "name": "modalOverlay",
+          "width": 874,
+          "height": 402,
+          "fill": "#00000099",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "afE0H",
+              "name": "modalDialog",
+              "width": 300,
+              "fill": "$--card",
+              "cornerRadius": 16,
+              "stroke": {
+                "thickness": 1,
+                "fill": "$--border"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 32,
+                "spread": 4
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mYhdv",
+                  "name": "iconWrap",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "$surfaceAlt",
+                  "cornerRadius": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "1ZAEe",
+                      "name": "iconClose",
+                      "width": 24,
+                      "height": 24,
+                      "iconFontName": "hourglass_top",
+                      "iconFontFamily": "Material Symbols Rounded",
+                      "fill": "$accentIndigo"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "vhjuF",
+                  "name": "titleText",
+                  "fill": "$--card-foreground",
+                  "content": "잠시 대기 중...",
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Fsjas",
+                  "name": "descText",
+                  "fill": "$--muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 240,
+                  "content": "업로드 큐가 가득 찼습니다.\n데이터 전송이 완료될 때까지\n잠시만 기다려 주세요.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 13
+                },
+                {
+                  "type": "frame",
+                  "id": "aLwyC",
+                  "name": "progressSection",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dlybn",
+                      "name": "progressInfo",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "dO7Gp",
+                          "fill": "$--muted-foreground",
+                          "content": "큐 상태",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "VWYLd",
+                          "fill": "$--card-foreground",
+                          "content": "128 / 128",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ewrsY",
+                      "name": "progressBarTrack",
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$--secondary",
+                      "cornerRadius": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "Va320",
+                          "name": "progressBarFill",
+                          "fill": "$accentIndigo",
+                          "width": "fill_container",
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "WCXPN",
+                      "fill": "$--muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "큐 공간이 확보되면 자동으로 녹화가 재개됩니다.",
+                      "textAlign": "center",
+                      "fontFamily": "$--font-secondary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "yORil",
+      "x": 6602,
+      "y": -589,
+      "name": "Map Create - Camera - 큐 대기 모달 (Dark)",
+      "theme": {
+        "mode": "dark",
+        "Mode": "Dark"
+      },
+      "width": 874,
+      "height": 402,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "es7Ws",
+          "x": 0,
+          "y": 0,
+          "name": "wrap",
+          "width": 874,
+          "height": 402,
+          "children": [
+            {
+              "type": "frame",
+              "id": "HZFz0",
+              "name": "preview",
+              "clip": true,
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#020617",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0F172A",
+                    "position": 0.55
+                  },
+                  {
+                    "color": "#1E293B",
+                    "position": 1
+                  }
+                ]
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                12,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tLWYL",
+                  "name": "topRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hOq6n",
+                      "name": "topBadge",
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "gap": 6,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "geB5K",
+                          "name": "recordStateDot",
+                          "fill": "#FFFFFF66",
+                          "width": 8,
+                          "height": 8
+                        },
+                        {
+                          "type": "frame",
+                          "id": "isGk0",
+                          "name": "metaWrap1",
+                          "layout": "vertical",
+                          "gap": 1,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "WZOkJ",
+                              "name": "mode",
+                              "fill": "#FFFFFF",
+                              "content": "오른손 모드",
+                              "lineHeight": 1.25,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qSBKE",
+                      "name": "exitBtn",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 18,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "bjJxf",
+                          "name": "exitIcon",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "close",
+                          "iconFontFamily": "Material Symbols Rounded",
+                          "weight": 500,
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "lWpT5",
+                  "name": "previewSpacer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical"
+                },
+                {
+                  "type": "frame",
+                  "id": "zMEby",
+                  "name": "sideLayer",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "padding": [
+                    0,
+                    8,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ryzwQ",
+                      "name": "rightStack",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "3IDsg",
+                          "name": "recordWrap",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "DIg4o",
+                              "name": "recordBtn",
+                              "width": 78,
+                              "height": 78,
+                              "fill": "#FFFFFFF0",
+                              "cornerRadius": 39,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#FFFFFF66"
+                              },
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "emNaQ",
+                                  "name": "recordInner",
+                                  "width": 62,
+                                  "height": 62,
+                                  "fill": "$accentCoral",
+                                  "cornerRadius": 31,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "5qYqC",
+                                      "fill": "$onAccent",
+                                      "width": 24,
+                                      "height": 24
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "fwDdd",
+                          "name": "indicatorToggle",
+                          "context": "인디케이터 토글",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#FFFFFF1F",
+                          "cornerRadius": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#FFFFFF2E"
+                          },
+                          "effect": {
+                            "type": "background_blur",
+                            "radius": 8
+                          },
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "qKJvg",
+                              "width": 18,
+                              "height": 18,
+                              "iconFontName": "gauge",
+                              "iconFontFamily": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cRHsP",
+                  "name": "hudDock",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "lPF63",
+                      "name": "hudCompact",
+                      "width": 176,
+                      "fill": "#FFFFFF1A",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#FFFFFF33"
+                      },
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        7,
+                        9
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "NRyqS",
+                          "name": "row1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "B7kji",
+                              "fill": "#FFFFFF",
+                              "content": "FPS 29.8",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "4gRwa",
+                              "fill": "#FFFFFF",
+                              "content": "통신 41ms",
+                              "lineHeight": 1.2,
+                              "fontFamily": "$--font-secondary",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "1HH0x",
+                          "name": "row2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "RFXTk",
+                              "fill": "#FFFFFFCC",
+                              "content": "IMU a(x,y,z): 0.03, -0.01, 9.79",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "T3zps",
+                              "fill": "#FFFFFFCC",
+                              "content": "Gyro r/p/y: 0.12, -0.04, 1.31",
+                              "lineHeight": 1.2,
+                              "fontFamily": "DM Sans",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "yP1d2",
+          "x": 0,
+          "y": 0,
+          "name": "modalOverlay",
+          "width": 874,
+          "height": 402,
+          "fill": "#00000099",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Wo1cM",
+              "name": "modalDialog",
+              "width": 300,
+              "fill": "$--card",
+              "cornerRadius": 16,
+              "stroke": {
+                "thickness": 1,
+                "fill": "$--border"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000066",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 32,
+                "spread": 4
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "G23QT",
+                  "name": "iconWrap",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "$surfaceAlt",
+                  "cornerRadius": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "XsFNe",
+                      "name": "iconClose",
+                      "width": 24,
+                      "height": 24,
+                      "iconFontName": "hourglass_top",
+                      "iconFontFamily": "Material Symbols Rounded",
+                      "fill": "$accentIndigo"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "xM2zX",
+                  "name": "titleText",
+                  "fill": "$--card-foreground",
+                  "content": "잠시 대기 중...",
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "Vr2nt",
+                  "name": "descText",
+                  "fill": "$--muted-foreground",
+                  "textGrowth": "fixed-width",
+                  "width": 240,
+                  "content": "업로드 큐가 가득 찼습니다.\n데이터 전송이 완료될 때까지\n잠시만 기다려 주세요.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$--font-secondary",
+                  "fontSize": 13
+                },
+                {
+                  "type": "frame",
+                  "id": "8wNPc",
+                  "name": "progressSection",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "nCT5O",
+                      "name": "progressInfo",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EKaDm",
+                          "fill": "$--muted-foreground",
+                          "content": "큐 상태",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "X5wFn",
+                          "fill": "$--card-foreground",
+                          "content": "128 / 128",
+                          "fontFamily": "$--font-secondary",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vtSjd",
+                      "name": "progressBarTrack",
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$--secondary",
+                      "cornerRadius": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "buxT2",
+                          "name": "progressBarFill",
+                          "fill": "$accentIndigo",
+                          "width": "fill_container",
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "rRxsA",
+                      "fill": "$--muted-foreground",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "큐 공간이 확보되면 자동으로 녹화가 재개됩니다.",
+                      "textAlign": "center",
+                      "fontFamily": "$--font-secondary",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "themes": {

@@ -67,9 +67,15 @@ class HudBadge extends StatelessWidget {
 
 class HudCompactPanel extends StatelessWidget {
   final EngineStatus? status;
-  final double fps;
+  final double captureFps;
+  final double sendFps;
 
-  const HudCompactPanel({super.key, this.status, this.fps = 0});
+  const HudCompactPanel({
+    super.key,
+    this.status,
+    this.captureFps = 0,
+    this.sendFps = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,14 +103,14 @@ class HudCompactPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildRow(
-                'FPS ${fps.toStringAsFixed(1)}',
+                'Cap ${captureFps.toStringAsFixed(1)}  Send ${sendFps.toStringAsFixed(1)}  $stateLabel',
                 Colors.white,
                 10,
                 FontWeight.w700,
               ),
               const SizedBox(height: 2),
               _buildRow(
-                'Frames $frameCount  $stateLabel',
+                'Sent ${s?.frameCount ?? 0} / Cap ${s?.totalPushed ?? 0}',
                 Colors.white,
                 10,
                 FontWeight.w700,
@@ -130,7 +136,7 @@ class HudCompactPanel extends StatelessWidget {
               if (s?.pressure != null) ...[
                 const SizedBox(height: 2),
                 _buildRow(
-                  'Baro ${s!.pressure!.toStringAsFixed(1)} hPa',
+                  'Baro ${s!.pressure!.toStringAsFixed(4)} hPa',
                   Colors.white.withValues(alpha: 0.8),
                   9,
                   FontWeight.w500,

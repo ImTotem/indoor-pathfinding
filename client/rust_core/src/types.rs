@@ -24,6 +24,8 @@ pub struct EngineStatus {
     pub state: SessionState,
     pub pose: Option<PoseResult>,
     pub frame_count: u64,
+    pub total_pushed: u64,
+    pub queue_full: bool,
     pub error_message: Option<String>,
 }
 
@@ -47,6 +49,8 @@ impl EngineStatus {
             state: SessionState::Idle,
             pose: None,
             frame_count: 0,
+            total_pushed: 0,
+            queue_full: false,
             error_message: None,
         }
     }

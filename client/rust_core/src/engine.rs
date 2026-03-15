@@ -21,7 +21,7 @@ pub struct RustCoreEngine {
 }
 
 struct ActiveSession {
-    sensor_tx: mpsc::UnboundedSender<SensorMsg>,
+    sensor_tx: mpsc::Sender<SensorMsg>,
     shutdown_tx: mpsc::Sender<()>,
 }
 
@@ -49,7 +49,6 @@ impl RustCoreEngine {
     /// 매핑 세션 시작
     pub fn start_mapping_session(
         &self,
-        session_id: String,
         map_id: String,
     ) -> Result<(), RustCoreError> {
         {
@@ -59,7 +58,7 @@ impl RustCoreEngine {
             }
         }
 
-        let (sensor_tx, sensor_rx) = mpsc::unbounded_channel();
+        let (sensor_tx, sensor_rx) = mpsc::channel(128);
         let (shutdown_tx, shutdown_rx) = mpsc::channel(1);
 
         // 상태 업데이트
@@ -67,6 +66,8 @@ impl RustCoreEngine {
             let mut s = self.status.lock();
             s.state = SessionState::Mapping;
             s.frame_count = 0;
+            s.total_pushed = 0;
+            s.queue_full = false;
             s.pose = None;
             s.error_message = None;
         }
@@ -82,7 +83,6 @@ impl RustCoreEngine {
         self.runtime.spawn(async move {
             if let Err(e) = run_mapping_session(
                 endpoint,
-                session_id,
                 map_id,
                 sensor_rx,
                 shutdown_rx,
@@ -103,7 +103,6 @@ impl RustCoreEngine {
     /// Localization 세션 시작
     pub fn start_localization_session(
         &self,
-        session_id: String,
         map_id: String,
     ) -> Result<(), RustCoreError> {
         {
@@ -113,13 +112,15 @@ impl RustCoreEngine {
             }
         }
 
-        let (sensor_tx, sensor_rx) = mpsc::unbounded_channel();
+        let (sensor_tx, sensor_rx) = mpsc::channel(128);
         let (shutdown_tx, shutdown_rx) = mpsc::channel(1);
 
         {
             let mut s = self.status.lock();
             s.state = SessionState::Localizing;
             s.frame_count = 0;
+            s.total_pushed = 0;
+            s.queue_full = false;
             s.pose = None;
             s.error_message = None;
         }
@@ -135,7 +136,6 @@ impl RustCoreEngine {
         self.runtime.spawn(async move {
             if let Err(e) = run_localization_session(
                 endpoint,
-                session_id,
                 map_id,
                 sensor_rx,
                 shutdown_rx,
@@ -166,9 +166,22 @@ impl RustCoreEngine {
 
     /// Native에서 센서 데이터 push
     pub fn push_sensor(&self, msg: SensorMsg) {
+        let is_frame = matches!(msg, SensorMsg::Frame { .. });
         let session = self.session.lock();
         if let Some(s) = session.as_ref() {
-            let _ = s.sensor_tx.send(msg);
+            match s.sensor_tx.try_send(msg) {
+                Ok(()) => {
+                    let mut st = self.status.lock();
+                    if is_frame {
+                        st.total_pushed += 1;
+                    }
+                    st.queue_full = false;
+                }
+                Err(mpsc::error::TrySendError::Full(_)) => {
+                    self.status.lock().queue_full = true;
+                }
+                Err(mpsc::error::TrySendError::Closed(_)) => {}
+            }
         }
     }
 
@@ -181,16 +194,15 @@ impl RustCoreEngine {
 /// 매핑 세션 백그라운드 태스크
 async fn run_mapping_session(
     endpoint: String,
-    session_id: String,
     map_id: String,
-    mut sensor_rx: mpsc::UnboundedReceiver<SensorMsg>,
+    mut sensor_rx: mpsc::Receiver<SensorMsg>,
     mut shutdown_rx: mpsc::Receiver<()>,
     status: Arc<Mutex<EngineStatus>>,
 ) -> Result<(), RustCoreError> {
     let client = GatewayClient::connect(&endpoint).await?;
 
-    client
-        .start_session(&session_id, &map_id, SessionKind::Mapping)
+    let session_id = client
+        .start_session(&map_id, SessionKind::Mapping)
         .await?;
 
     let (stream_tx, mut response_stream) = client.open_mapping_stream().await?;
@@ -237,6 +249,17 @@ async fn run_mapping_session(
         }
     }
 
+    // 큐에 남은 데이터 모두 전송
+    while let Ok(msg) = sensor_rx.try_recv() {
+        if let Some(packet) = aggregator.process_mapping(msg) {
+            if stream_tx.send(packet).await.is_err() {
+                break;
+            }
+            status.lock().frame_count += 1;
+        }
+    }
+    info!("Flushed remaining sensor data");
+
     // 스트림 종료 → 세션 정리
     drop(stream_tx);
     client.stop_session(&session_id).await?;
@@ -253,16 +276,15 @@ async fn run_mapping_session(
 /// Localization 세션 백그라운드 태스크
 async fn run_localization_session(
     endpoint: String,
-    session_id: String,
     map_id: String,
-    mut sensor_rx: mpsc::UnboundedReceiver<SensorMsg>,
+    mut sensor_rx: mpsc::Receiver<SensorMsg>,
     mut shutdown_rx: mpsc::Receiver<()>,
     status: Arc<Mutex<EngineStatus>>,
 ) -> Result<(), RustCoreError> {
     let client = GatewayClient::connect(&endpoint).await?;
 
-    client
-        .start_session(&session_id, &map_id, SessionKind::Localization)
+    let session_id = client
+        .start_session(&map_id, SessionKind::Localization)
         .await?;
 
     let (stream_tx, mut response_stream) = client.open_localization_stream().await?;
@@ -307,6 +329,17 @@ async fn run_localization_session(
             }
         }
     }
+
+    // 큐에 남은 데이터 모두 전송
+    while let Ok(msg) = sensor_rx.try_recv() {
+        if let Some(packet) = aggregator.process_localization(msg) {
+            if stream_tx.send(packet).await.is_err() {
+                break;
+            }
+            status.lock().frame_count += 1;
+        }
+    }
+    info!("Flushed remaining sensor data");
 
     drop(stream_tx);
     client.stop_session(&session_id).await?;

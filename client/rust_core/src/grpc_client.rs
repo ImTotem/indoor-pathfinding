@@ -42,16 +42,15 @@ impl GatewayClient {
         Ok(Self { channel })
     }
 
-    /// SessionService.Start 호출
+    /// SessionService.Start 호출 → 서버가 생성한 session_id 반환
     pub async fn start_session(
         &self,
-        session_id: &str,
         map_id: &str,
         kind: SessionKind,
-    ) -> Result<(), RustCoreError> {
+    ) -> Result<String, RustCoreError> {
         let mut client = SessionServiceClient::new(self.channel.clone());
         let request = StartSessionPacket {
-            session_id: session_id.to_string(),
+            session_id: String::new(),
             map_id: map_id.to_string(),
             r#type: match kind {
                 SessionKind::Mapping => 0,
@@ -64,8 +63,9 @@ impl GatewayClient {
             .map_err(|e| RustCoreError::GrpcError {
                 reason: e.to_string(),
             })?;
-        info!("Session started: {:?}", response.into_inner());
-        Ok(())
+        let session_id = response.into_inner().session_id;
+        info!("Session started: {}", session_id);
+        Ok(session_id)
     }
 
     /// SessionService.Stop 호출
@@ -95,7 +95,7 @@ impl GatewayClient {
         RustCoreError,
     > {
         let mut client = MappingServiceClient::new(self.channel.clone());
-        let (tx, rx) = mpsc::channel(32);
+        let (tx, rx) = mpsc::channel(128);
         let stream = ReceiverStream::new(rx);
         let response = client
             .stream_mapping(stream)
@@ -117,7 +117,7 @@ impl GatewayClient {
         RustCoreError,
     > {
         let mut client = LocalizationServiceClient::new(self.channel.clone());
-        let (tx, rx) = mpsc::channel(32);
+        let (tx, rx) = mpsc::channel(128);
         let stream = ReceiverStream::new(rx);
         let response = client
             .localize(stream)

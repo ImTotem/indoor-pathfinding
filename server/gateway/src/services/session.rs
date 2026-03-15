@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::info;
+use uuid::Uuid;
 
 use indoor_pathfinding_protocols::service::session_service_server::SessionService;
 use indoor_pathfinding_protocols::session::{
@@ -19,6 +20,11 @@ impl SessionServiceImpl {
     }
 }
 
+/// session_id 생성: "s" + 하이픈 없는 UUID (ROS2 토픽 이름 규칙 충족)
+fn generate_session_id() -> String {
+    format!("s{}", Uuid::new_v4().simple())
+}
+
 #[tonic::async_trait]
 impl SessionService for SessionServiceImpl {
     async fn start(
@@ -26,7 +32,8 @@ impl SessionService for SessionServiceImpl {
         request: Request<StartSessionPacket>,
     ) -> Result<Response<SessionResponse>, Status> {
         let req = request.into_inner();
-        info!(session_id = %req.session_id, map_id = %req.map_id, r#type = req.r#type, "세션 시작 요청");
+        let session_id = generate_session_id();
+        info!(session_id = %session_id, map_id = %req.map_id, r#type = req.r#type, "세션 시작 요청");
 
         let session_type = match req.r#type {
             0 => SessionType::Mapping,
@@ -35,12 +42,12 @@ impl SessionService for SessionServiceImpl {
         };
 
         self.manager
-            .start_session(req.session_id.clone(), req.map_id, session_type)
+            .start_session(session_id.clone(), req.map_id, session_type)
             .await
             .map_err(|e| Status::already_exists(e))?;
 
         Ok(Response::new(SessionResponse {
-            session_id: req.session_id,
+            session_id,
             state: SessionState::Active.into(),
             message: "Session started".into(),
         }))

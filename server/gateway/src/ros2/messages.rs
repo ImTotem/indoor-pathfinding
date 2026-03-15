@@ -16,7 +16,7 @@ pub fn header(timestamp: f64, frame_id: &str) -> std_msgs::msg::Header {
 pub fn compressed_image(timestamp: f64, data: Vec<u8>) -> sensor_msgs::msg::CompressedImage {
     sensor_msgs::msg::CompressedImage {
         header: header(timestamp, "camera"),
-        format: "png".to_string(),
+        format: "jpeg".to_string(),
         data,
     }
 }

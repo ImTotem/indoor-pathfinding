@@ -11,7 +11,7 @@ impl Ros2Publisher {
         Ok(Self)
     }
 
-    pub fn create_session_publishers(&self, _prefix: &str, _session_type: SessionType) {}
+    pub fn create_session_publishers(&self, _session_id: &str, _prefix: &str, _session_type: SessionType) {}
     pub fn remove_session_publishers(&self, _session_id: &str) {}
     pub fn publish_image(&self, _session_id: &str, _timestamp: f64, _data: &[u8]) {}
     pub fn publish_imu(&self, _session_id: &str, _timestamp: f64, _accel: [f64; 3], _gyro: [f64; 3]) {}

@@ -65,6 +65,8 @@ class ResultBridge(
             "state" to stateStr,
             "pose" to poseMap,
             "frameCount" to status.frameCount.toLong(),
+            "totalPushed" to status.totalPushed.toLong(),
+            "queueFull" to status.queueFull,
             "errorMessage" to status.errorMessage,
             "accel" to accel?.map { it.toDouble() },
             "gyro" to gyro?.map { it.toDouble() },

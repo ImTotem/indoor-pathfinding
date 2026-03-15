@@ -2,6 +2,11 @@ package com.example.indoor_pathfinding.sensor
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageFormat
+import android.graphics.Matrix
+import android.graphics.Rect
+import android.graphics.YuvImage
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Size
@@ -16,7 +21,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.indoor_pathfinding.rust_core.pushFrame
 import io.flutter.view.TextureRegistry
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
 class CameraCapture(
@@ -26,8 +30,10 @@ class CameraCapture(
     private var cameraProvider: ProcessCameraProvider? = null
     private var textureEntry: TextureRegistry.SurfaceTextureEntry? = null
     private var intrinsics: FloatArray? = null
-    private var capturing = false
     private val analyzerExecutor = Executors.newSingleThreadExecutor()
+
+    @Volatile var capturing = false
+    @Volatile var flipImage = false // 왼손 모드일 때 180° 회전
 
     fun startPreview(entry: TextureRegistry.SurfaceTextureEntry) {
         this.textureEntry = entry
@@ -41,12 +47,10 @@ class CameraCapture(
 
     fun startCapture() {
         capturing = true
-        bindCamera()
     }
 
     fun stopCapture() {
         capturing = false
-        bindCamera()
     }
 
     fun stopAll() {
@@ -63,7 +67,9 @@ class CameraCapture(
         val entry = textureEntry ?: return
         provider.unbindAll()
 
-        val preview = Preview.Builder().build()
+        val preview = Preview.Builder()
+            .setTargetResolution(Size(1920, 1080))
+            .build()
         preview.surfaceProvider = Preview.SurfaceProvider { request ->
             val surfaceTexture = entry.surfaceTexture()
             surfaceTexture.setDefaultBufferSize(request.resolution.width, request.resolution.height)
@@ -73,19 +79,22 @@ class CameraCapture(
             }
         }
 
-        val selector = CameraSelector.DEFAULT_BACK_CAMERA
+        // ImageAnalysis 항상 바인딩 — capturing 플래그로 전송 제어
+        val analysis = ImageAnalysis.Builder()
+            .setTargetResolution(Size(640, 480))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build() // YUV_420_888 기본 포맷
 
-        if (capturing) {
-            val analysis = ImageAnalysis.Builder()
-                .setTargetResolution(Size(640, 480))
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-            analysis.setAnalyzer(analyzerExecutor) { processFrame(it) }
-            provider.bindToLifecycle(lifecycleOwner, selector, preview, analysis)
-        } else {
-            provider.bindToLifecycle(lifecycleOwner, selector, preview)
+        analysis.setAnalyzer(analyzerExecutor) { proxy ->
+            if (capturing) {
+                processFrame(proxy)
+            } else {
+                proxy.close()
+            }
         }
+
+        val selector = CameraSelector.DEFAULT_BACK_CAMERA
+        provider.bindToLifecycle(lifecycleOwner, selector, preview, analysis)
     }
 
     private fun extractIntrinsics(w: Int, h: Int) {
@@ -114,42 +123,48 @@ class CameraCapture(
     private fun processFrame(proxy: ImageProxy) {
         try {
             val ts = proxy.imageInfo.timestamp / 1_000_000_000.0
-            val png = toPng(proxy)
-            val i = intrinsics ?: floatArrayOf(proxy.width * 0.9f, proxy.height * 0.9f, proxy.width / 2f, proxy.height / 2f)
-            pushFrame(ts, png, i[0].toDouble(), i[1].toDouble(), i[2].toDouble(), i[3].toDouble())
+            var jpeg = yuvToJpeg(proxy)
+            if (flipImage) {
+                jpeg = rotateJpeg(jpeg, 180f)
+            }
+            val i = intrinsics ?: floatArrayOf(
+                proxy.width * 0.9f, proxy.height * 0.9f,
+                proxy.width / 2f, proxy.height / 2f,
+            )
+            pushFrame(ts, jpeg, i[0].toDouble(), i[1].toDouble(), i[2].toDouble(), i[3].toDouble())
         } finally {
             proxy.close()
         }
     }
 
-    private fun toPng(proxy: ImageProxy): ByteArray {
-        val w = proxy.width
-        val h = proxy.height
-        val buf = proxy.planes[0].buffer
-        val rowStride = proxy.planes[0].rowStride
-        val pixelStride = proxy.planes[0].pixelStride
-        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        if (rowStride == w * pixelStride) {
-            bmp.copyPixelsFromBuffer(buf)
-        } else {
-            val row = ByteArray(rowStride)
-            val px = IntArray(w)
-            for (y in 0 until h) {
-                buf.position(y * rowStride)
-                buf.get(row, 0, minOf(rowStride, buf.remaining()))
-                for (x in 0 until w) {
-                    val off = x * pixelStride
-                    px[x] = android.graphics.Color.argb(
-                        row[off + 3].toInt() and 0xFF, row[off].toInt() and 0xFF,
-                        row[off + 1].toInt() and 0xFF, row[off + 2].toInt() and 0xFF,
-                    )
-                }
-                bmp.setPixels(px, 0, w, 0, y, w, 1)
-            }
-        }
-        val out = ByteArrayOutputStream()
-        bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
+    private fun rotateJpeg(jpeg: ByteArray, degrees: Float): ByteArray {
+        val bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
+        val matrix = Matrix().apply { postRotate(degrees) }
+        val rotated = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
         bmp.recycle()
+        val out = ByteArrayOutputStream()
+        rotated.compress(Bitmap.CompressFormat.JPEG, 95, out)
+        rotated.recycle()
+        return out.toByteArray()
+    }
+
+    private fun yuvToJpeg(proxy: ImageProxy): ByteArray {
+        val yBuffer = proxy.planes[0].buffer
+        val uBuffer = proxy.planes[1].buffer
+        val vBuffer = proxy.planes[2].buffer
+
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
+
+        val nv21 = ByteArray(ySize + uSize + vSize)
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize + vSize, uSize)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, proxy.width, proxy.height, null)
+        val out = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, proxy.width, proxy.height), 95, out)
         return out.toByteArray()
     }
 }

@@ -1,6 +1,8 @@
 package com.example.indoor_pathfinding.bridge
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import androidx.lifecycle.LifecycleOwner
 import com.example.indoor_pathfinding.sensor.CameraCapture
 import io.flutter.plugin.common.MethodCall
@@ -33,10 +35,26 @@ class CameraBridge(
                 entry = null
                 result.success(null)
             }
+            "setFlip" -> {
+                val flip = call.argument<Boolean>("flip") ?: false
+                capture?.flipImage = flip
+                result.success(null)
+            }
+            "setSensorLandscape" -> {
+                (context as Activity).requestedOrientation =
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                result.success(null)
+            }
+            "resetOrientation" -> {
+                (context as Activity).requestedOrientation =
+                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }
 
     fun startCapture() = capture?.startCapture()
     fun stopCapture() = capture?.stopCapture()
+    fun setLeftHanded(left: Boolean) { capture?.flipImage = left }
 }
