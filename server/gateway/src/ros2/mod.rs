@@ -1,3 +1,7 @@
+mod commands;
+
+#[cfg(feature = "ros2")]
+mod messages;
 #[cfg(feature = "ros2")]
 mod publisher;
 

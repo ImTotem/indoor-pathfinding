@@ -9,7 +9,8 @@ message LocalizationPacket {
   double timestamp = 2;
   bytes query_image = 3;
   indoor_pathfinding.common.Intrinsics intrinsics = 4;
-  optional LocalizationHint hint = 5;
+  indoor_pathfinding.common.BarometerData barometer = 5;
+  optional LocalizationHint hint = 6;
 }
 
 message LocalizationHint {

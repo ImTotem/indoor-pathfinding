@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::info;
 
@@ -6,8 +7,17 @@ use indoor_pathfinding_protocols::session::{
     GetStatusRequest, SessionResponse, SessionState, StartSessionPacket, StopSessionPacket,
 };
 
-#[derive(Default)]
-pub struct SessionServiceImpl;
+use crate::session_manager::{SessionManager, SessionType};
+
+pub struct SessionServiceImpl {
+    manager: Arc<SessionManager>,
+}
+
+impl SessionServiceImpl {
+    pub fn new(manager: Arc<SessionManager>) -> Self {
+        Self { manager }
+    }
+}
 
 #[tonic::async_trait]
 impl SessionService for SessionServiceImpl {
@@ -17,10 +27,18 @@ impl SessionService for SessionServiceImpl {
     ) -> Result<Response<SessionResponse>, Status> {
         let req = request.into_inner();
         info!(session_id = %req.session_id, map_id = %req.map_id, r#type = req.r#type, "세션 시작 요청");
-        // TODO: SessionType에 따라 분기
-        //  - MAPPING: MASt3R-SLAM 초기화, rosbag2 녹화 시작
-        //  - LOCALIZATION: map_id에 해당하는 맵 파일 로드, RoMa 초기화
-        // TODO: 세션 상태를 관리하는 구조체에 등록
+
+        let session_type = match req.r#type {
+            0 => SessionType::Mapping,
+            1 => SessionType::Localization,
+            _ => return Err(Status::invalid_argument("알 수 없는 세션 타입")),
+        };
+
+        self.manager
+            .start_session(req.session_id.clone(), req.map_id, session_type)
+            .await
+            .map_err(|e| Status::already_exists(e))?;
+
         Ok(Response::new(SessionResponse {
             session_id: req.session_id,
             state: SessionState::Active.into(),
@@ -34,7 +52,12 @@ impl SessionService for SessionServiceImpl {
     ) -> Result<Response<SessionResponse>, Status> {
         let req = request.into_inner();
         info!(session_id = %req.session_id, "세션 중지 요청");
-        // TODO: SLAM 엔진 정리, rosbag2 녹화 중지, 세션 상태 제거
+
+        self.manager
+            .stop_session(&req.session_id)
+            .await
+            .map_err(|e| Status::not_found(e))?;
+
         Ok(Response::new(SessionResponse {
             session_id: req.session_id,
             state: SessionState::Idle.into(),
@@ -46,11 +69,18 @@ impl SessionService for SessionServiceImpl {
         &self,
         _request: Request<GetStatusRequest>,
     ) -> Result<Response<SessionResponse>, Status> {
-        // TODO: 현재 활성 세션 조회, 없으면 Idle 반환
-        Ok(Response::new(SessionResponse {
-            session_id: String::new(),
-            state: SessionState::Idle.into(),
-            message: "Idle".into(),
-        }))
+        if let Some(session) = self.manager.get_active_session().await {
+            Ok(Response::new(SessionResponse {
+                session_id: session.session_id,
+                state: SessionState::Active.into(),
+                message: format!("Active: {:?}", session.session_type),
+            }))
+        } else {
+            Ok(Response::new(SessionResponse {
+                session_id: String::new(),
+                state: SessionState::Idle.into(),
+                message: "Idle".into(),
+            }))
+        }
     }
 }

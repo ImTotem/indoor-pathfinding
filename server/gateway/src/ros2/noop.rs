@@ -1,5 +1,7 @@
 use tracing::warn;
 
+use crate::session_manager::SessionType;
+
 /// ROS2 미설치 환경용 no-op 퍼블리셔
 pub struct Ros2Publisher;
 
@@ -9,26 +11,10 @@ impl Ros2Publisher {
         Ok(Self)
     }
 
+    pub fn create_session_publishers(&self, _prefix: &str, _session_type: SessionType) {}
+    pub fn remove_session_publishers(&self, _session_id: &str) {}
     pub fn publish_image(&self, _session_id: &str, _timestamp: f64, _data: &[u8]) {}
-
-    pub fn publish_imu(
-        &self,
-        _session_id: &str,
-        _timestamp: f64,
-        _accel: [f64; 3],
-        _gyro: [f64; 3],
-    ) {}
-
-    pub fn publish_camera_info(
-        &self,
-        _session_id: &str,
-        _fx: f64,
-        _fy: f64,
-        _cx: f64,
-        _cy: f64,
-    ) {}
-
+    pub fn publish_imu(&self, _session_id: &str, _timestamp: f64, _accel: [f64; 3], _gyro: [f64; 3]) {}
+    pub fn publish_camera_info(&self, _session_id: &str, _fx: f64, _fy: f64, _cx: f64, _cy: f64) {}
     pub fn publish_barometer(&self, _session_id: &str, _timestamp: f64, _pressure: f64) {}
-
-    pub fn spin_once(&self) {}
 }
