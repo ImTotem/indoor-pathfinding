@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     protobuf-compiler \
+    libclang-dev \
     ros-humble-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,9 +24,14 @@ COPY protocols/ ./protocols/
 RUN cd protocols/rust && cargo build --release
 
 COPY server/gateway/ ./server/gateway/
-RUN cd server/gateway && cargo build --release
+RUN . /opt/ros/humble/setup.sh && \
+    cd server/gateway && cargo build --release --features ros2
 
 RUN cp /workspace/server/gateway/target/release/gateway /usr/local/bin/ && \
     rm -rf /workspace/server/gateway/target
 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
 EXPOSE 50051
+
+CMD ["entrypoint.sh"]
