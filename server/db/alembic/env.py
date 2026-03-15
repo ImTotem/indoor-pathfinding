@@ -9,12 +9,24 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "api"))
-from app.models import Base
+# 로컬: server/db/alembic/env.py → server/api
+# Docker: /app/db/alembic/env.py → /app
+env_dir = Path(__file__).resolve().parent
+for candidate in [env_dir.parents[1] / "api", env_dir.parents[1]]:
+    if (candidate / "app").is_dir():
+        sys.path.insert(0, str(candidate))
+        break
+
+from app.models import Base  # noqa: E402
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+# 환경변수 DATABASE_URL이 있으면 alembic.ini의 값을 덮어씀
+import os
+if db_url := os.getenv("DATABASE_URL"):
+    config.set_main_option("sqlalchemy.url", db_url)
 
 target_metadata = Base.metadata
 
