@@ -23,6 +23,46 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+// ── Rust Core 경로 ──
+def rustCoreDir = file("${project.rootDir}/../../rust_core")
+def jniLibsDir = file("${project.projectDir}/src/main/jniLibs")
+def uniffiOutDir = file("${project.projectDir}/src/main/java")
+def cargoTargetDir = file("${project.rootDir}/../../../target")
+
+// ── Rust Core 크로스 컴파일 + UniFFI 바인딩 생성 ──
+task buildRustCore(type: Exec) {
+    workingDir rustCoreDir
+    environment "ANDROID_NDK_HOME", android.ndkDirectory.absolutePath
+
+    commandLine "cargo", "ndk",
+        "-o", jniLibsDir.absolutePath,
+        "-t", "arm64-v8a",
+        "-t", "x86_64",
+        "build", "--release"
+}
+
+task buildRustCoreHost(type: Exec) {
+    workingDir rustCoreDir
+    commandLine "cargo", "build", "-p", "indoor-pathfinding-rust-core", "--release"
+}
+
+task generateUniffiBindings(type: Exec) {
+    dependsOn buildRustCoreHost
+    workingDir rustCoreDir
+    commandLine "cargo", "run", "--release", "--bin", "uniffi-bindgen",
+        "generate",
+        "--library", "${cargoTargetDir}/release/librust_core.so",
+        "--language", "kotlin",
+        "--out-dir", uniffiOutDir.absolutePath
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == "preBuild") {
+        task.dependsOn buildRustCore
+        task.dependsOn generateUniffiBindings
+    }
+}
+
 android {
     namespace = "com.example.indoor_pathfinding"
     compileSdk = flutter.compileSdkVersion
@@ -38,11 +78,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.indoor_pathfinding"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -50,11 +87,26 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
         }
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["src/main/jniLibs"]
+        }
+    }
+}
+
+dependencies {
+    // CameraX
+    def camerax_version = "1.4.1"
+    implementation "androidx.camera:camera-core:$camerax_version"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+
+    // UniFFI JNA
+    implementation "net.java.dev.jna:jna:5.14.0@aar"
 }
 
 flutter {

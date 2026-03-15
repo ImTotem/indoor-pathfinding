@@ -1,4 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../models/engine_status.dart';
+import '../services/session_service.dart';
+import '../services/result_stream.dart';
 import '../theme/app_theme.dart';
 
 class PathfindingCameraScreen extends StatefulWidget {
@@ -12,9 +16,54 @@ class PathfindingCameraScreen extends StatefulWidget {
 class _PathfindingCameraScreenState extends State<PathfindingCameraScreen> {
   bool _isGuiding = false;
 
+  final _sessionService = SessionService();
+  final _resultStream = ResultStream();
+  StreamSubscription<EngineStatus>? _statusSub;
+  EngineStatus _status = EngineStatus.idle;
+  String? _mapId;
+
+  @override
+  void initState() {
+    super.initState();
+    _statusSub = _resultStream.statusStream.listen((status) {
+      if (mounted) setState(() => _status = status);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mapId ??= ModalRoute.of(context)?.settings.arguments as String?;
+  }
+
+  @override
+  void dispose() {
+    _statusSub?.cancel();
+    if (_isGuiding) {
+      _sessionService.stopSession();
+    }
+    super.dispose();
+  }
+
+  Future<void> _startGuiding() async {
+    if (_mapId == null) return;
+    try {
+      await _sessionService.startLocalization(_mapId!);
+      setState(() => _isGuiding = true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('세션 시작 실패: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final pose = _status.pose;
+
     return Scaffold(
       backgroundColor: const Color(0xFF020617),
       body: Container(
@@ -38,19 +87,38 @@ class _PathfindingCameraScreenState extends State<PathfindingCameraScreen> {
                 Expanded(
                   child: _isGuiding
                       ? Center(
-                          child: AnimatedOpacity(
-                            opacity: _isGuiding ? 1.0 : 0.0,
-                            duration: const Duration(milliseconds: 300),
-                            child: const Text(
-                              '현재 위치 파악을 위해 주변을\n촬영해 주세요',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFF8FAFC),
-                                height: 1.4,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                '현재 위치 파악을 위해 주변을\n촬영해 주세요',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFF8FAFC),
+                                  height: 1.4,
+                                ),
                               ),
-                            ),
+                              if (pose != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  'x: ${pose.x.toStringAsFixed(2)}, y: ${pose.y.toStringAsFixed(2)}, z: ${pose.z.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 8),
+                              Text(
+                                'Frames: ${_status.frameCount}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ],
                           ),
                         )
                       : const SizedBox.shrink(),
@@ -59,11 +127,7 @@ class _PathfindingCameraScreenState extends State<PathfindingCameraScreen> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (!_isGuiding) {
-                        setState(() => _isGuiding = true);
-                      }
-                    },
+                    onPressed: _isGuiding ? null : _startGuiding,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: c.accentIndigo,
                       foregroundColor: c.onAccent,
@@ -72,9 +136,9 @@ class _PathfindingCameraScreenState extends State<PathfindingCameraScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      '길찾기 시작',
-                      style: TextStyle(
+                    child: Text(
+                      _isGuiding ? '위치 분석 중...' : '길찾기 시작',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

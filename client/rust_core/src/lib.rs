@@ -1,70 +1,96 @@
-use std::collections::VecDeque;
-use std::sync::Mutex;
+/// UniFFI 진입점 — Kotlin/Swift 바인딩으로 노출되는 함수
 
-use indoor_pathfinding_protocols::mapping::MappingPacket;
+mod aggregator;
+mod engine;
+mod grpc_client;
+mod types;
 
-/// 센서 데이터 큐
-pub struct SensorQueue {
-    queue: Mutex<VecDeque<MappingPacket>>,
-    capacity: usize,
+use aggregator::SensorMsg;
+use engine::RustCoreEngine;
+pub use types::*;
+
+uniffi::setup_scaffolding!();
+
+/// 엔진 초기화 (앱 시작 시 1회)
+#[uniffi::export]
+pub fn init_engine(server_endpoint: String) {
+    RustCoreEngine::init(server_endpoint);
 }
 
-impl SensorQueue {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            queue: Mutex::new(VecDeque::with_capacity(capacity)),
-            capacity,
-        }
-    }
-
-    /// 센서 패킷을 큐에 추가. 용량 초과 시 가장 오래된 데이터 제거.
-    pub fn push(&self, packet: MappingPacket) {
-        let mut q = self.queue.lock().unwrap();
-        if q.len() >= self.capacity {
-            q.pop_front();
-        }
-        q.push_back(packet);
-    }
-
-    /// 큐에서 패킷을 하나 꺼냄
-    pub fn pop(&self) -> Option<MappingPacket> {
-        self.queue.lock().unwrap().pop_front()
-    }
-
-    /// 큐에 남은 패킷 수
-    pub fn len(&self) -> usize {
-        self.queue.lock().unwrap().len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
+/// 매핑 세션 시작 — gRPC SessionService.Start + MappingService.StreamMapping 오픈
+#[uniffi::export]
+pub fn start_mapping_session(session_id: String, map_id: String) -> Result<(), RustCoreError> {
+    RustCoreEngine::get().start_mapping_session(session_id, map_id)
 }
 
-/// gRPC 클라이언트 — gateway에 센서 데이터를 전송
-pub struct GrpcClient {
-    _endpoint: String,
+/// Localization 세션 시작 — gRPC SessionService.Start + LocalizationService.Localize 오픈
+#[uniffi::export]
+pub fn start_localization_session(
+    session_id: String,
+    map_id: String,
+) -> Result<(), RustCoreError> {
+    RustCoreEngine::get().start_localization_session(session_id, map_id)
 }
 
-impl GrpcClient {
-    pub fn new(endpoint: String) -> Self {
-        Self {
-            _endpoint: endpoint,
-        }
-    }
+/// 현재 세션 종료 — gRPC 스트림 닫기 + SessionService.Stop
+#[uniffi::export]
+pub fn stop_session() -> Result<(), RustCoreError> {
+    RustCoreEngine::get().stop_session()
+}
 
-    /// 서버에 연결 (TODO: 실제 tonic 채널 연결)
-    pub async fn connect(&self) -> Result<(), Box<dyn std::error::Error>> {
-        // TODO: tonic::transport::Channel::from_shared → connect
-        Ok(())
-    }
+/// 카메라 프레임 push (Native에서 호출)
+#[uniffi::export]
+pub fn push_frame(
+    timestamp: f64,
+    image_data: Vec<u8>,
+    fx: f64,
+    fy: f64,
+    cx: f64,
+    cy: f64,
+) {
+    RustCoreEngine::get().push_sensor(SensorMsg::Frame {
+        timestamp,
+        image_data,
+        fx,
+        fy,
+        cx,
+        cy,
+    });
+}
 
-    /// 센서 스트리밍 시작 (TODO: 실제 gRPC 스트리밍)
-    pub async fn start_streaming(
-        &self,
-        _queue: &SensorQueue,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        // TODO: MappingService::stream_mapping 양방향 스트리밍
-        Ok(())
-    }
+/// IMU 데이터 push (Native에서 호출)
+#[uniffi::export]
+pub fn push_imu(
+    timestamp: f64,
+    ax: f64,
+    ay: f64,
+    az: f64,
+    gx: f64,
+    gy: f64,
+    gz: f64,
+) {
+    RustCoreEngine::get().push_sensor(SensorMsg::Imu {
+        timestamp,
+        ax,
+        ay,
+        az,
+        gx,
+        gy,
+        gz,
+    });
+}
+
+/// 기압계 데이터 push (Native에서 호출)
+#[uniffi::export]
+pub fn push_barometer(timestamp: f64, pressure: f64) {
+    RustCoreEngine::get().push_sensor(SensorMsg::Barometer {
+        timestamp,
+        pressure,
+    });
+}
+
+/// 엔진 상태 조회 (Kotlin 폴링용)
+#[uniffi::export]
+pub fn get_status() -> EngineStatus {
+    RustCoreEngine::get().get_status()
 }

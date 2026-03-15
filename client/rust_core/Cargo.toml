@@ -7,11 +7,20 @@ edition = "2021"
 crate-type = ["lib", "cdylib"]
 name = "rust_core"
 
+[[bin]]
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
+
 [dependencies]
 indoor-pathfinding-protocols = { path = "../../protocols/rust" }
 tonic = "0.14"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+tokio-stream = "0.1"
+prost = "0.14"
 uniffi = { version = "0.28", features = ["cli"] }
+parking_lot = "0.12"
+tracing = "0.1"
+thiserror = "2"
 
 [build-dependencies]
 uniffi = { version = "0.28", features = ["build"] }

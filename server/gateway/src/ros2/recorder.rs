@@ -21,9 +21,10 @@ impl Rosbag2Recorder {
         session_type: SessionType,
         output_dir: &str,
     ) {
+        let safe_id = session_id.replace('-', "_");
         let prefix = match session_type {
-            SessionType::Mapping => format!("/slam/mapping/{session_id}"),
-            SessionType::Localization => format!("/slam/localization/{session_id}"),
+            SessionType::Mapping => format!("/slam/mapping/s{safe_id}"),
+            SessionType::Localization => format!("/slam/localization/s{safe_id}"),
         };
 
         let mut topics = vec![

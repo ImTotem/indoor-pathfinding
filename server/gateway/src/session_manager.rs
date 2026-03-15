@@ -47,9 +47,10 @@ impl SessionManager {
             return Err(format!("세션이 이미 존재합니다: {session_id}"));
         }
 
+        let safe_id = session_id.replace('-', "_");
         let prefix = match session_type {
-            SessionType::Mapping => format!("/slam/mapping/{session_id}"),
-            SessionType::Localization => format!("/slam/localization/{session_id}"),
+            SessionType::Mapping => format!("/slam/mapping/s{safe_id}"),
+            SessionType::Localization => format!("/slam/localization/s{safe_id}"),
         };
 
         self.publisher.create_session_publishers(&prefix, session_type);

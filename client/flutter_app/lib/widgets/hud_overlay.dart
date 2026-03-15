@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../models/engine_status.dart';
 import '../theme/app_theme.dart';
 
 class HudBadge extends StatelessWidget {
@@ -65,10 +66,18 @@ class HudBadge extends StatelessWidget {
 }
 
 class HudCompactPanel extends StatelessWidget {
-  const HudCompactPanel({super.key});
+  final EngineStatus? status;
+  final double fps;
+
+  const HudCompactPanel({super.key, this.status, this.fps = 0});
 
   @override
   Widget build(BuildContext context) {
+    final s = status;
+    final frameCount = s?.frameCount ?? 0;
+    final pose = s?.pose;
+    final stateLabel = s != null ? _stateLabel(s.state) : '--';
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: BackdropFilter(
@@ -87,28 +96,75 @@ class HudCompactPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildRow('FPS 29.8', Colors.white, 10, FontWeight.w700),
-              const SizedBox(height: 2),
-              _buildRow('통신 41ms', Colors.white, 10, FontWeight.w700),
-              const SizedBox(height: 4),
               _buildRow(
-                'IMU a(x,y,z): 0.03, -0.01, 9.79',
-                Colors.white.withValues(alpha: 0.8),
-                9,
-                FontWeight.w500,
+                'FPS ${fps.toStringAsFixed(1)}',
+                Colors.white,
+                10,
+                FontWeight.w700,
               ),
               const SizedBox(height: 2),
               _buildRow(
-                'Gyro r/p/y: 0.12, -0.04, 1.31',
-                Colors.white.withValues(alpha: 0.8),
-                9,
-                FontWeight.w500,
+                'Frames $frameCount  $stateLabel',
+                Colors.white,
+                10,
+                FontWeight.w700,
               ),
+              if (s?.accel != null) ...[
+                const SizedBox(height: 4),
+                _buildRow(
+                  'IMU ${_f(s!.accel![0])}, ${_f(s.accel![1])}, ${_f(s.accel![2])}',
+                  Colors.white.withValues(alpha: 0.8),
+                  9,
+                  FontWeight.w500,
+                ),
+              ],
+              if (s?.gyro != null) ...[
+                const SizedBox(height: 2),
+                _buildRow(
+                  'Gyro ${_f(s!.gyro![0])}, ${_f(s.gyro![1])}, ${_f(s.gyro![2])}',
+                  Colors.white.withValues(alpha: 0.8),
+                  9,
+                  FontWeight.w500,
+                ),
+              ],
+              if (s?.pressure != null) ...[
+                const SizedBox(height: 2),
+                _buildRow(
+                  'Baro ${s!.pressure!.toStringAsFixed(1)} hPa',
+                  Colors.white.withValues(alpha: 0.8),
+                  9,
+                  FontWeight.w500,
+                ),
+              ],
+              if (pose != null) ...[
+                const SizedBox(height: 4),
+                _buildRow(
+                  'Pos ${_f(pose.x)}, ${_f(pose.y)}, ${_f(pose.z)}',
+                  Colors.white.withValues(alpha: 0.8),
+                  9,
+                  FontWeight.w500,
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _f(double v) => v.toStringAsFixed(2);
+
+  String _stateLabel(SessionState state) {
+    switch (state) {
+      case SessionState.idle:
+        return 'Idle';
+      case SessionState.mapping:
+        return 'Mapping';
+      case SessionState.localizing:
+        return 'Localizing';
+      case SessionState.error:
+        return 'Error';
+    }
   }
 
   Widget _buildRow(

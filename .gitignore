@@ -25,3 +25,10 @@ __pycache__/
 
 # Flutter (fvm)
 .fvm/
+
+# Android native build artifacts
+**/.cxx/
+**/jniLibs/
+
+# UniFFI generated bindings
+**/java/com/indoor_pathfinding/

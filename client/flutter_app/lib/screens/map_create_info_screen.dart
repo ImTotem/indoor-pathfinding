@@ -37,7 +37,7 @@ class _MapCreateInfoScreenState extends State<MapCreateInfoScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await _mapApi.create(
+      final map = await _mapApi.create(
         name: name,
         description: _descController.text.trim().isEmpty
             ? null
@@ -46,7 +46,7 @@ class _MapCreateInfoScreenState extends State<MapCreateInfoScreen> {
         longitude: double.tryParse(_lngController.text),
       );
       if (mounted) {
-        Navigator.pushNamed(context, '/map-create-camera');
+        Navigator.pushNamed(context, '/map-create-camera', arguments: map.id);
       }
     } catch (e) {
       if (mounted) {
