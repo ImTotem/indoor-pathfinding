@@ -10,7 +10,6 @@ name = "rust_core"
 [dependencies]
 indoor-pathfinding-protocols = { path = "../../protocols/rust" }
 tonic = "0.12"
-prost = "0.13"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 uniffi = { version = "0.28", features = ["cli"] }
 
