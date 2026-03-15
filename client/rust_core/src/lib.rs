@@ -1,11 +1,11 @@
 use std::collections::VecDeque;
 use std::sync::Mutex;
 
-use indoor_pathfinding_protocols::sensor;
+use indoor_pathfinding_protocols::mapping::MappingPacket;
 
 /// 센서 데이터 큐
 pub struct SensorQueue {
-    queue: Mutex<VecDeque<sensor::SensorPacket>>,
+    queue: Mutex<VecDeque<MappingPacket>>,
     capacity: usize,
 }
 
@@ -18,7 +18,7 @@ impl SensorQueue {
     }
 
     /// 센서 패킷을 큐에 추가. 용량 초과 시 가장 오래된 데이터 제거.
-    pub fn push(&self, packet: sensor::SensorPacket) {
+    pub fn push(&self, packet: MappingPacket) {
         let mut q = self.queue.lock().unwrap();
         if q.len() >= self.capacity {
             q.pop_front();
@@ -27,7 +27,7 @@ impl SensorQueue {
     }
 
     /// 큐에서 패킷을 하나 꺼냄
-    pub fn pop(&self) -> Option<sensor::SensorPacket> {
+    pub fn pop(&self) -> Option<MappingPacket> {
         self.queue.lock().unwrap().pop_front()
     }
 
@@ -41,7 +41,7 @@ impl SensorQueue {
     }
 }
 
-/// gRPC 클라이언트 — bridge_node에 센서 데이터를 전송
+/// gRPC 클라이언트 — gateway에 센서 데이터를 전송
 pub struct GrpcClient {
     _endpoint: String,
 }
@@ -64,7 +64,7 @@ impl GrpcClient {
         &self,
         _queue: &SensorQueue,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        // TODO: SensorService::stream_sensor 양방향 스트리밍
+        // TODO: MappingService::stream_mapping 양방향 스트리밍
         Ok(())
     }
 }

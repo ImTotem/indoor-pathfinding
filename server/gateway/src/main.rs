@@ -1,135 +1,17 @@
-use std::pin::Pin;
+mod services;
 
-use tokio_stream::Stream;
-use tonic::{transport::Server, Request, Response, Status, Streaming};
+use tonic::transport::Server;
 use tracing::info;
 
-use indoor_pathfinding_protocols::localization::{
-    LocalizationPacket, LocalizationResponse, LocalizationState,
-};
-use indoor_pathfinding_protocols::mapping::{MappingPacket, MappingResponse, MappingState};
 use indoor_pathfinding_protocols::service::{
-    localization_service_server::{LocalizationService, LocalizationServiceServer},
-    mapping_service_server::{MappingService, MappingServiceServer},
-    session_service_server::{SessionService, SessionServiceServer},
-};
-use indoor_pathfinding_protocols::session::{
-    GetStatusRequest, SessionResponse, SessionState, StartSessionPacket, StopSessionPacket,
+    localization_service_server::LocalizationServiceServer,
+    mapping_service_server::MappingServiceServer,
+    session_service_server::SessionServiceServer,
 };
 
-// === Mapping Service ===
-
-#[derive(Default)]
-pub struct MappingServiceImpl;
-
-#[tonic::async_trait]
-impl MappingService for MappingServiceImpl {
-    type StreamMappingStream =
-        Pin<Box<dyn Stream<Item = Result<MappingResponse, Status>> + Send + 'static>>;
-
-    async fn stream_mapping(
-        &self,
-        request: Request<Streaming<MappingPacket>>,
-    ) -> Result<Response<Self::StreamMappingStream>, Status> {
-        info!("맵 생성 스트리밍 연결");
-        let mut stream = request.into_inner();
-
-        let output = async_stream::try_stream! {
-            while let Some(packet) = stream.message().await? {
-                info!(session = %packet.session_id, ts = packet.timestamp, "매핑 패킷 수신");
-
-                // TODO: ROS2 토픽으로 발행 → MASt3R-SLAM 처리 → 결과 수신
-                yield MappingResponse {
-                    timestamp: packet.timestamp,
-                    pose: None,
-                    state: MappingState::Initializing.into(),
-                };
-            }
-        };
-
-        Ok(Response::new(Box::pin(output) as Self::StreamMappingStream))
-    }
-}
-
-// === Localization Service ===
-
-#[derive(Default)]
-pub struct LocalizationServiceImpl;
-
-#[tonic::async_trait]
-impl LocalizationService for LocalizationServiceImpl {
-    type LocalizeStream =
-        Pin<Box<dyn Stream<Item = Result<LocalizationResponse, Status>> + Send + 'static>>;
-
-    async fn localize(
-        &self,
-        request: Request<Streaming<LocalizationPacket>>,
-    ) -> Result<Response<Self::LocalizeStream>, Status> {
-        info!("위치 탐색 스트리밍 연결");
-        let mut stream = request.into_inner();
-
-        let output = async_stream::try_stream! {
-            while let Some(packet) = stream.message().await? {
-                info!(session = %packet.session_id, ts = packet.timestamp, "로컬라이제이션 패킷 수신");
-
-                // TODO: ROS2 토픽으로 발행 → RoMa 처리 → 결과 수신
-                yield LocalizationResponse {
-                    timestamp: packet.timestamp,
-                    pose: None,
-                    confidence: 0.0,
-                    state: LocalizationState::Unspecified.into(),
-                };
-            }
-        };
-
-        Ok(Response::new(Box::pin(output) as Self::LocalizeStream))
-    }
-}
-
-// === Session Service ===
-
-#[derive(Default)]
-pub struct SessionServiceImpl;
-
-#[tonic::async_trait]
-impl SessionService for SessionServiceImpl {
-    async fn start(
-        &self,
-        request: Request<StartSessionPacket>,
-    ) -> Result<Response<SessionResponse>, Status> {
-        let req = request.into_inner();
-        info!(session_id = %req.session_id, map_id = %req.map_id, r#type = req.r#type, "세션 시작 요청");
-        Ok(Response::new(SessionResponse {
-            session_id: req.session_id,
-            state: SessionState::Active.into(),
-            message: "Session started".into(),
-        }))
-    }
-
-    async fn stop(
-        &self,
-        request: Request<StopSessionPacket>,
-    ) -> Result<Response<SessionResponse>, Status> {
-        let req = request.into_inner();
-        info!(session_id = %req.session_id, "세션 중지 요청");
-        Ok(Response::new(SessionResponse {
-            session_id: req.session_id,
-            state: SessionState::Idle.into(),
-            message: "Session stopped".into(),
-        }))
-    }
-
-    async fn get_status(
-        &self,
-        _request: Request<GetStatusRequest>,
-    ) -> Result<Response<SessionResponse>, Status> {
-        Ok(Response::new(SessionResponse {
-            session_id: String::new(),
-            state: SessionState::Idle.into(),
-            message: "Idle".into(),
-        }))
-    }
-}
+use services::localization::LocalizationServiceImpl;
+use services::mapping::MappingServiceImpl;
+use services::session::SessionServiceImpl;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

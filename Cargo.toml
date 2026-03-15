@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "protocols/rust",
+    "client/rust_core",
+    "server/gateway",
+]
+resolver = "2"
