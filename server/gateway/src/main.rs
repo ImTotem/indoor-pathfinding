@@ -5,8 +5,7 @@ use tracing::info;
 
 use indoor_pathfinding_protocols::service::{
     localization_service_server::LocalizationServiceServer,
-    mapping_service_server::MappingServiceServer,
-    session_service_server::SessionServiceServer,
+    mapping_service_server::MappingServiceServer, session_service_server::SessionServiceServer,
 };
 
 use services::localization::LocalizationServiceImpl;
