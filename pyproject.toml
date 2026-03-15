@@ -11,3 +11,9 @@ dependencies = [
     "alembic>=1.14.1",
     "pydantic>=2.10.4",
 ]
+
+[tool.pyright]
+extraPaths = ["server/api"]
+
+[tool.pytest.ini_options]
+pythonpath = ["server/api"]

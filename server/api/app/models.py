@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, func
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import String, Float, DateTime, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -18,8 +18,8 @@ class Map(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
-    # 맵 메타데이터 (층 정보, 좌표계 등)
-    metadata_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

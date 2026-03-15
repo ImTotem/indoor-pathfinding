@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "api"))
-from app.models import Base  # noqa: E402
+from app.models import Base
 
 config = context.config
 if config.config_file_name is not None:

@@ -8,7 +8,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 
 revision: str = "001"
 down_revision: Union[str, None] = None
@@ -22,7 +22,8 @@ def upgrade() -> None:
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.String, nullable=True),
-        sa.Column("metadata_json", JSONB, nullable=True),
+        sa.Column("latitude", sa.Float, nullable=True),
+        sa.Column("longitude", sa.Float, nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
