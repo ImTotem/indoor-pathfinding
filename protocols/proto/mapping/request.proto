@@ -10,6 +10,7 @@ message MappingPacket {
   bytes image_data = 3;
   repeated ImuData imu_data = 4;
   indoor_pathfinding.common.Intrinsics intrinsics = 5;
+  indoor_pathfinding.common.BarometerData barometer = 6;
 }
 
 message ImuData {

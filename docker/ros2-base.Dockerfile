@@ -30,8 +30,13 @@ RUN . /opt/ros/humble/setup.sh && \
 RUN cp /workspace/server/gateway/target/release/gateway /usr/local/bin/ && \
     rm -rf /workspace/server/gateway/target
 
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 EXPOSE 50051
 
-CMD ["entrypoint.sh"]
+CMD ["bash", "-c", "\
+    . /opt/ros/humble/setup.bash && \
+    mkdir -p /workspace/rosbag2 && \
+    ros2 bag record -o /workspace/rosbag2/session \
+        /slam/image/compressed /slam/imu /slam/camera_info /slam/barometer & \
+    gateway"]

@@ -9,9 +9,7 @@ impl Ros2Publisher {
         Ok(Self)
     }
 
-    pub fn publish_image(&self, _session_id: &str, _timestamp: f64, _data: &[u8]) {
-        // no-op
-    }
+    pub fn publish_image(&self, _session_id: &str, _timestamp: f64, _data: &[u8]) {}
 
     pub fn publish_imu(
         &self,
@@ -19,9 +17,7 @@ impl Ros2Publisher {
         _timestamp: f64,
         _accel: [f64; 3],
         _gyro: [f64; 3],
-    ) {
-        // no-op
-    }
+    ) {}
 
     pub fn publish_camera_info(
         &self,
@@ -30,11 +26,9 @@ impl Ros2Publisher {
         _fy: f64,
         _cx: f64,
         _cy: f64,
-    ) {
-        // no-op
-    }
+    ) {}
 
-    pub fn spin_once(&self) {
-        // no-op
-    }
+    pub fn publish_barometer(&self, _session_id: &str, _timestamp: f64, _pressure: f64) {}
+
+    pub fn spin_once(&self) {}
 }

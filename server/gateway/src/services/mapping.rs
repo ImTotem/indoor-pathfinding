@@ -59,6 +59,11 @@ impl MappingService for MappingServiceImpl {
                     );
                 }
 
+                // 기압계 발행
+                if let Some(baro) = &packet.barometer {
+                    publisher.publish_barometer(&packet.session_id, baro.timestamp, baro.pressure);
+                }
+
                 // TODO: MASt3R-SLAM 결과 수신
                 yield MappingResponse {
                     timestamp: packet.timestamp,

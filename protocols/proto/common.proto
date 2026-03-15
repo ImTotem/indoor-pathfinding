@@ -26,3 +26,8 @@ message Pose {
   Vector3 position = 1;
   Quaternion orientation = 2;
 }
+
+message BarometerData {
+  double timestamp = 1;
+  double pressure = 2;
+}

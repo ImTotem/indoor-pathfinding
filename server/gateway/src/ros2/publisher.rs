@@ -7,6 +7,7 @@ pub struct Ros2Publisher {
     image_pub: r2r::Publisher<sensor_msgs::msg::CompressedImage>,
     imu_pub: r2r::Publisher<sensor_msgs::msg::Imu>,
     camera_info_pub: r2r::Publisher<sensor_msgs::msg::CameraInfo>,
+    barometer_pub: r2r::Publisher<sensor_msgs::msg::FluidPressure>,
 }
 
 impl Ros2Publisher {
@@ -26,6 +27,10 @@ impl Ros2Publisher {
             "/slam/camera_info",
             QosProfile::default(),
         )?;
+        let barometer_pub = node.create_publisher::<sensor_msgs::msg::FluidPressure>(
+            "/slam/barometer",
+            QosProfile::default(),
+        )?;
 
         info!("ROS2 퍼블리셔 초기화 완료");
 
@@ -34,6 +39,7 @@ impl Ros2Publisher {
             image_pub,
             imu_pub,
             camera_info_pub,
+            barometer_pub,
         })
     }
 
@@ -49,7 +55,7 @@ impl Ros2Publisher {
                 },
                 frame_id: "camera".to_string(),
             },
-            format: "jpeg".to_string(),
+            format: "png".to_string(),
             data: data.to_vec(),
         };
 
@@ -115,6 +121,27 @@ impl Ros2Publisher {
 
         if let Err(e) = self.camera_info_pub.publish(&msg) {
             tracing::error!("CameraInfo 발행 실패: {e}");
+        }
+    }
+
+    pub fn publish_barometer(&self, _session_id: &str, timestamp: f64, pressure: f64) {
+        let secs = timestamp as i32;
+        let nanosecs = ((timestamp - secs as f64) * 1e9) as u32;
+
+        let msg = sensor_msgs::msg::FluidPressure {
+            header: std_msgs::msg::Header {
+                stamp: r2r::builtin_interfaces::msg::Time {
+                    sec: secs,
+                    nanosec: nanosecs,
+                },
+                frame_id: "barometer".to_string(),
+            },
+            fluid_pressure: pressure,
+            variance: 0.0,
+        };
+
+        if let Err(e) = self.barometer_pub.publish(&msg) {
+            tracing::error!("기압계 발행 실패: {e}");
         }
     }
 
