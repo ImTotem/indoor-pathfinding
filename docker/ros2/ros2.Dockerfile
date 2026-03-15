@@ -41,8 +41,4 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 EXPOSE 50051
 
-CMD ["bash", "-c", "\
-    . /opt/ros/humble/setup.bash && \
-    mkdir -p /workspace/rosbag2 && \
-    ros2 bag record -a -o /workspace/rosbag2/session & \
-    gateway"]
+CMD ["bash", "-c", ". /opt/ros/humble/setup.bash && gateway"]

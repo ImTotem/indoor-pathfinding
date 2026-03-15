@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 use tracing::info;
 
-use crate::ros2::Ros2Publisher;
+use crate::ros2::{Ros2Publisher, Rosbag2Recorder};
+
+const ROSBAG2_OUTPUT_DIR: &str = "/workspace/rosbag2";
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum SessionType {
@@ -21,6 +23,7 @@ pub struct Session {
 pub struct SessionManager {
     sessions: RwLock<HashMap<String, Session>>,
     publisher: Arc<Ros2Publisher>,
+    recorder: Mutex<Rosbag2Recorder>,
 }
 
 impl SessionManager {
@@ -28,6 +31,7 @@ impl SessionManager {
         Self {
             sessions: RwLock::new(HashMap::new()),
             publisher,
+            recorder: Mutex::new(Rosbag2Recorder::new()),
         }
     }
 
@@ -48,8 +52,12 @@ impl SessionManager {
             SessionType::Localization => format!("/slam/localization/{session_id}"),
         };
 
-        self.publisher
-            .create_session_publishers(&prefix, session_type);
+        self.publisher.create_session_publishers(&prefix, session_type);
+
+        self.recorder
+            .lock()
+            .await
+            .start_recording(&session_id, session_type, ROSBAG2_OUTPUT_DIR);
 
         let session = Session {
             session_id: session_id.clone(),
@@ -71,6 +79,7 @@ impl SessionManager {
             .ok_or_else(|| format!("세션을 찾을 수 없습니다: {session_id}"))?;
 
         self.publisher.remove_session_publishers(session_id);
+        self.recorder.lock().await.stop_recording(session_id);
 
         info!(session_id = %session_id, "세션 제거");
         Ok(session)
