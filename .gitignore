@@ -22,3 +22,6 @@ __pycache__/
 
 # Docker
 .docker/
+
+# Flutter (fvm)
+.fvm/
