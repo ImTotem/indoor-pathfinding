@@ -25,16 +25,16 @@ class AppColors {
 
   // Dark mode
   static const dark = AppColorScheme(
-    bg: Color(0xFF0B0F17),
-    surface: Color(0xFF1A2230),
-    surfaceAlt: Color(0xFF202B3D),
+    bg: Color(0xFF111111),
+    surface: Color(0xFF1C1C1C),
+    surfaceAlt: Color(0xFF1A1F2E),
     textPrimary: Color(0xFFF2F5F8),
     textSecondary: Color(0xFFA7B0BF),
     textTertiary: Color(0xFF8A94A6),
-    accentIndigo: Color(0xFF4F7DFF),
-    accentCoral: Color(0xFF3B82F6),
+    accentIndigo: Color(0xFF2563EB),
+    accentCoral: Color(0xFF2563EB),
     onAccent: Color(0xFFFFFFFF),
-    strokeSubtle: Color(0xFF2B3442),
+    strokeSubtle: Color(0xFF2E2E2E),
     card: Color(0xFF1A1A1A),
     foreground: Color(0xFFFFFFFF),
     muted: Color(0xFF2E2E2E),

@@ -13,6 +13,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color accentCoral;
   final Color onAccent;
   final Color strokeSubtle;
+  final Color card;
+  final Color foreground;
+  final Color mutedForeground;
+  final Color secondary;
+  final Color secondaryForeground;
+  final Color border;
 
   const AppColorsExtension({
     required this.bg,
@@ -25,6 +31,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.accentCoral,
     required this.onAccent,
     required this.strokeSubtle,
+    required this.card,
+    required this.foreground,
+    required this.mutedForeground,
+    required this.secondary,
+    required this.secondaryForeground,
+    required this.border,
   });
 
   @override
@@ -39,6 +51,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? accentCoral,
     Color? onAccent,
     Color? strokeSubtle,
+    Color? card,
+    Color? foreground,
+    Color? mutedForeground,
+    Color? secondary,
+    Color? secondaryForeground,
+    Color? border,
   }) {
     return AppColorsExtension(
       bg: bg ?? this.bg,
@@ -51,6 +69,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       accentCoral: accentCoral ?? this.accentCoral,
       onAccent: onAccent ?? this.onAccent,
       strokeSubtle: strokeSubtle ?? this.strokeSubtle,
+      card: card ?? this.card,
+      foreground: foreground ?? this.foreground,
+      mutedForeground: mutedForeground ?? this.mutedForeground,
+      secondary: secondary ?? this.secondary,
+      secondaryForeground: secondaryForeground ?? this.secondaryForeground,
+      border: border ?? this.border,
     );
   }
 
@@ -71,6 +95,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       accentCoral: Color.lerp(accentCoral, other.accentCoral, t)!,
       onAccent: Color.lerp(onAccent, other.onAccent, t)!,
       strokeSubtle: Color.lerp(strokeSubtle, other.strokeSubtle, t)!,
+      card: Color.lerp(card, other.card, t)!,
+      foreground: Color.lerp(foreground, other.foreground, t)!,
+      mutedForeground: Color.lerp(mutedForeground, other.mutedForeground, t)!,
+      secondary: Color.lerp(secondary, other.secondary, t)!,
+      secondaryForeground: Color.lerp(secondaryForeground, other.secondaryForeground, t)!,
+      border: Color.lerp(border, other.border, t)!,
     );
   }
 
@@ -86,6 +116,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       accentCoral: scheme.accentCoral,
       onAccent: scheme.onAccent,
       strokeSubtle: scheme.strokeSubtle,
+      card: scheme.card,
+      foreground: scheme.foreground,
+      mutedForeground: scheme.mutedForeground,
+      secondary: scheme.secondary,
+      secondaryForeground: scheme.secondaryForeground,
+      border: scheme.border,
     );
   }
 }

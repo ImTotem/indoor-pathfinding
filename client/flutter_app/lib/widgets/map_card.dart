@@ -38,7 +38,7 @@ class MapCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: c.accentIndigo.withOpacity(0.12),
+                    color: c.accentIndigo.withValues(alpha: 0.12),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),

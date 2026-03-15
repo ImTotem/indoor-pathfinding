@@ -23,7 +23,7 @@ class HudBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: isRecording
             ? const Color(0xFFF87171)
-            : Colors.white.withOpacity(0.4),
+            : Colors.white.withValues(alpha: 0.4),
         shape: BoxShape.circle,
       ),
     );
@@ -45,10 +45,10 @@ class HudBadge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -77,10 +77,10 @@ class HudCompactPanel extends StatelessWidget {
           width: 176,
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -93,14 +93,14 @@ class HudCompactPanel extends StatelessWidget {
               const SizedBox(height: 4),
               _buildRow(
                 'IMU a(x,y,z): 0.03, -0.01, 9.79',
-                Colors.white.withOpacity(0.8),
+                Colors.white.withValues(alpha: 0.8),
                 9,
                 FontWeight.w500,
               ),
               const SizedBox(height: 2),
               _buildRow(
                 'Gyro r/p/y: 0.12, -0.04, 1.31',
-                Colors.white.withOpacity(0.8),
+                Colors.white.withValues(alpha: 0.8),
                 9,
                 FontWeight.w500,
               ),
@@ -140,10 +140,10 @@ class RecordButton extends StatelessWidget {
         width: 78,
         height: 78,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.94),
+          color: Colors.white.withValues(alpha: 0.94),
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
@@ -191,10 +191,10 @@ class IndicatorToggleButton extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 width: 1,
               ),
             ),
