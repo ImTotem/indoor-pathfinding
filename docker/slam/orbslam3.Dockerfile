@@ -1,4 +1,4 @@
-FROM indoor-pathfinding-ros2-base:latest
+FROM indoor-pathfinding-ros2:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -23,14 +23,14 @@ RUN apt-get update && apt-get install -y \
     libglew-dev \
     libeigen3-dev \
     libpython3-dev \
-    # OpenCV 빌드
+    # OpenCV 빌드 \
     libavcodec-dev \
     libavformat-dev \
     libswscale-dev \
     libgstreamer-plugins-base1.0-dev \
     libgstreamer1.0-dev \
     libgtk-3-dev \
-    # ROS2 패키지
+    # ROS2 패키지 \
     ros-humble-pcl-ros \
     ros-humble-cv-bridge \
     ros-humble-image-transport \

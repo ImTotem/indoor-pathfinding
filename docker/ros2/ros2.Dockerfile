@@ -34,9 +34,10 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 EXPOSE 50051
 
+COPY docker/ros2/ /workspace/config/
+
 CMD ["bash", "-c", "\
     . /opt/ros/humble/setup.bash && \
     mkdir -p /workspace/rosbag2 && \
-    ros2 bag record -o /workspace/rosbag2/session \
-        /slam/image/compressed /slam/imu /slam/camera_info /slam/barometer & \
+    ros2 bag record --config /workspace/config/rosbag2.yaml & \
     gateway"]
