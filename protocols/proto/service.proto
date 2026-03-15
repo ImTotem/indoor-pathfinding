@@ -11,19 +11,19 @@ import "session/response.proto";
 
 service MappingService {
   rpc StreamMapping(stream indoor_pathfinding.mapping.MappingPacket)
-      returns (stream indoor_pathfinding.mapping.MappingResult);
+      returns (stream indoor_pathfinding.mapping.MappingResponse);
 }
 
 service LocalizationService {
   rpc Localize(stream indoor_pathfinding.localization.LocalizationPacket)
-      returns (stream indoor_pathfinding.localization.LocalizationResult);
+      returns (stream indoor_pathfinding.localization.LocalizationResponse);
 }
 
 service SessionService {
-  rpc Start(indoor_pathfinding.session.StartSession)
+  rpc Start(indoor_pathfinding.session.StartSessionPacket)
       returns (indoor_pathfinding.session.SessionResponse);
 
-  rpc Stop(indoor_pathfinding.session.StopSession)
+  rpc Stop(indoor_pathfinding.session.StopSessionPacket)
       returns (indoor_pathfinding.session.SessionResponse);
 
   rpc GetStatus(indoor_pathfinding.session.GetStatusRequest)

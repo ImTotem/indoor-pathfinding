@@ -5,16 +5,16 @@ use tonic::{transport::Server, Request, Response, Status, Streaming};
 use tracing::info;
 
 use indoor_pathfinding_protocols::localization::{
-    LocalizationPacket, LocalizationResult, LocalizationState,
+    LocalizationPacket, LocalizationResponse, LocalizationState,
 };
-use indoor_pathfinding_protocols::mapping::{MappingPacket, MappingResult, MappingState};
+use indoor_pathfinding_protocols::mapping::{MappingPacket, MappingResponse, MappingState};
 use indoor_pathfinding_protocols::service::{
     localization_service_server::{LocalizationService, LocalizationServiceServer},
     mapping_service_server::{MappingService, MappingServiceServer},
     session_service_server::{SessionService, SessionServiceServer},
 };
 use indoor_pathfinding_protocols::session::{
-    GetStatusRequest, SessionResponse, SessionState, StartSession, StopSession,
+    GetStatusRequest, SessionResponse, SessionState, StartSessionPacket, StopSessionPacket,
 };
 
 // === Mapping Service ===
@@ -25,7 +25,7 @@ pub struct MappingServiceImpl;
 #[tonic::async_trait]
 impl MappingService for MappingServiceImpl {
     type StreamMappingStream =
-        Pin<Box<dyn Stream<Item = Result<MappingResult, Status>> + Send + 'static>>;
+        Pin<Box<dyn Stream<Item = Result<MappingResponse, Status>> + Send + 'static>>;
 
     async fn stream_mapping(
         &self,
@@ -39,7 +39,7 @@ impl MappingService for MappingServiceImpl {
                 info!(session = %packet.session_id, ts = packet.timestamp, "매핑 패킷 수신");
 
                 // TODO: ROS2 토픽으로 발행 → MASt3R-SLAM 처리 → 결과 수신
-                yield MappingResult {
+                yield MappingResponse {
                     timestamp: packet.timestamp,
                     pose: None,
                     state: MappingState::Initializing.into(),
@@ -59,7 +59,7 @@ pub struct LocalizationServiceImpl;
 #[tonic::async_trait]
 impl LocalizationService for LocalizationServiceImpl {
     type LocalizeStream =
-        Pin<Box<dyn Stream<Item = Result<LocalizationResult, Status>> + Send + 'static>>;
+        Pin<Box<dyn Stream<Item = Result<LocalizationResponse, Status>> + Send + 'static>>;
 
     async fn localize(
         &self,
@@ -73,7 +73,7 @@ impl LocalizationService for LocalizationServiceImpl {
                 info!(session = %packet.session_id, ts = packet.timestamp, "로컬라이제이션 패킷 수신");
 
                 // TODO: ROS2 토픽으로 발행 → RoMa 처리 → 결과 수신
-                yield LocalizationResult {
+                yield LocalizationResponse {
                     timestamp: packet.timestamp,
                     pose: None,
                     confidence: 0.0,
@@ -95,10 +95,10 @@ pub struct SessionServiceImpl;
 impl SessionService for SessionServiceImpl {
     async fn start(
         &self,
-        request: Request<StartSession>,
+        request: Request<StartSessionPacket>,
     ) -> Result<Response<SessionResponse>, Status> {
         let req = request.into_inner();
-        info!(session_id = %req.session_id, "세션 시작 요청");
+        info!(session_id = %req.session_id, map_id = %req.map_id, r#type = req.r#type, "세션 시작 요청");
         Ok(Response::new(SessionResponse {
             session_id: req.session_id,
             state: SessionState::Active.into(),
@@ -108,7 +108,7 @@ impl SessionService for SessionServiceImpl {
 
     async fn stop(
         &self,
-        request: Request<StopSession>,
+        request: Request<StopSessionPacket>,
     ) -> Result<Response<SessionResponse>, Status> {
         let req = request.into_inner();
         info!(session_id = %req.session_id, "세션 중지 요청");

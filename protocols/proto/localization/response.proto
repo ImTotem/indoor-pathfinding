@@ -4,7 +4,7 @@ package indoor_pathfinding.localization;
 
 import "common.proto";
 
-message LocalizationResult {
+message LocalizationResponse {
   double timestamp = 1;
   indoor_pathfinding.common.Pose pose = 2;
   float confidence = 3;

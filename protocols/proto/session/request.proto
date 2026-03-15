@@ -2,18 +2,18 @@ syntax = "proto3";
 
 package indoor_pathfinding.session;
 
-message StartSession {
+message StartSessionPacket {
   string session_id = 1;
-  SessionConfig config = 2;
+  string map_id = 2;
+  SessionType type = 3;
 }
 
-message SessionConfig {
-  double camera_fps = 1;
-  double imu_rate = 2;
-  bool enable_recording = 3;
+enum SessionType {
+  SESSION_TYPE_MAPPING = 0;
+  SESSION_TYPE_LOCALIZATION = 1;
 }
 
-message StopSession {
+message StopSessionPacket {
   string session_id = 1;
 }
 

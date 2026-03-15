@@ -4,7 +4,7 @@ package indoor_pathfinding.mapping;
 
 import "common.proto";
 
-message MappingResult {
+message MappingResponse {
   double timestamp = 1;
   indoor_pathfinding.common.Pose pose = 2;
   MappingState state = 3;
