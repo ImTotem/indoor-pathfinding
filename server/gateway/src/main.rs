@@ -22,15 +22,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let publisher = Arc::new(Ros2Publisher::new()?);
 
-    // ROS2 spin을 백그라운드에서 실행
-    let spin_publisher = publisher.clone();
-    tokio::spawn(async move {
-        loop {
-            spin_publisher.spin_once();
-            tokio::time::sleep(std::time::Duration::from_millis(1)).await;
-        }
-    });
-
     let addr = "[::]:50051".parse()?;
     info!(%addr, "gateway gRPC 서버 시작");
 
