@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package indoor_pathfinding.common;
+
+message Vector3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Quaternion {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+message Intrinsics {
+  double fx = 1;
+  double fy = 2;
+  double cx = 3;
+  double cy = 4;
+}
+
+message Pose {
+  Vector3 position = 1;
+  Quaternion orientation = 2;
+}

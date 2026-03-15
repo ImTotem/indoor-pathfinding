@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package indoor_pathfinding.service;
+
+import "mapping/request.proto";
+import "mapping/response.proto";
+import "localization/request.proto";
+import "localization/response.proto";
+import "session/request.proto";
+import "session/response.proto";
+
+service MappingService {
+  rpc StreamMapping(stream indoor_pathfinding.mapping.MappingPacket)
+      returns (stream indoor_pathfinding.mapping.MappingResult);
+}
+
+service LocalizationService {
+  rpc Localize(stream indoor_pathfinding.localization.LocalizationPacket)
+      returns (stream indoor_pathfinding.localization.LocalizationResult);
+}
+
+service SessionService {
+  rpc Start(indoor_pathfinding.session.StartSession)
+      returns (indoor_pathfinding.session.SessionResponse);
+
+  rpc Stop(indoor_pathfinding.session.StopSession)
+      returns (indoor_pathfinding.session.SessionResponse);
+
+  rpc GetStatus(indoor_pathfinding.session.GetStatusRequest)
+      returns (indoor_pathfinding.session.SessionResponse);
+}

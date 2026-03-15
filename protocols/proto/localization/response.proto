@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package indoor_pathfinding.localization;
+
+import "common.proto";
+
+message LocalizationResult {
+  double timestamp = 1;
+  indoor_pathfinding.common.Pose pose = 2;
+  float confidence = 3;
+  LocalizationState state = 4;
+}
+
+enum LocalizationState {
+  LOCALIZATION_STATE_UNSPECIFIED = 0;
+  LOCALIZATION_STATE_OK = 1;
+  LOCALIZATION_STATE_LOST = 2;
+}

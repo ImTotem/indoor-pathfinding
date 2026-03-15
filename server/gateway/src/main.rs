@@ -4,14 +4,16 @@ use tokio_stream::Stream;
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 use tracing::info;
 
-use indoor_pathfinding_protocols::sensor::{
-    mapping_service_server::{MappingService, MappingServiceServer},
-    localization_service_server::{LocalizationService, LocalizationServiceServer},
+use indoor_pathfinding_protocols::localization::{
     LocalizationPacket, LocalizationResult, LocalizationState,
-    MappingPacket, MappingResult, MappingState,
 };
-use indoor_pathfinding_protocols::sync::{
-    sync_service_server::{SyncService, SyncServiceServer},
+use indoor_pathfinding_protocols::mapping::{MappingPacket, MappingResult, MappingState};
+use indoor_pathfinding_protocols::service::{
+    localization_service_server::{LocalizationService, LocalizationServiceServer},
+    mapping_service_server::{MappingService, MappingServiceServer},
+    session_service_server::{SessionService, SessionServiceServer},
+};
+use indoor_pathfinding_protocols::session::{
     GetStatusRequest, SessionResponse, SessionState, StartSession, StopSession,
 };
 
@@ -39,8 +41,7 @@ impl MappingService for MappingServiceImpl {
                 // TODO: ROS2 토픽으로 발행 → MASt3R-SLAM 처리 → 결과 수신
                 yield MappingResult {
                     timestamp: packet.timestamp,
-                    position: None,
-                    orientation: None,
+                    pose: None,
                     state: MappingState::Initializing.into(),
                 };
             }
@@ -74,8 +75,7 @@ impl LocalizationService for LocalizationServiceImpl {
                 // TODO: ROS2 토픽으로 발행 → RoMa 처리 → 결과 수신
                 yield LocalizationResult {
                     timestamp: packet.timestamp,
-                    position: None,
-                    orientation: None,
+                    pose: None,
                     confidence: 0.0,
                     state: LocalizationState::Unspecified.into(),
                 };
@@ -86,13 +86,13 @@ impl LocalizationService for LocalizationServiceImpl {
     }
 }
 
-// === Sync Service ===
+// === Session Service ===
 
 #[derive(Default)]
-pub struct SyncServiceImpl;
+pub struct SessionServiceImpl;
 
 #[tonic::async_trait]
-impl SyncService for SyncServiceImpl {
+impl SessionService for SessionServiceImpl {
     async fn start(
         &self,
         request: Request<StartSession>,
@@ -140,8 +140,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Server::builder()
         .add_service(MappingServiceServer::new(MappingServiceImpl::default()))
-        .add_service(LocalizationServiceServer::new(LocalizationServiceImpl::default()))
-        .add_service(SyncServiceServer::new(SyncServiceImpl::default()))
+        .add_service(LocalizationServiceServer::new(
+            LocalizationServiceImpl::default(),
+        ))
+        .add_service(SessionServiceServer::new(SessionServiceImpl::default()))
         .serve_with_shutdown(addr, async {
             tokio::signal::ctrl_c().await.ok();
             info!("종료 시그널 수신");

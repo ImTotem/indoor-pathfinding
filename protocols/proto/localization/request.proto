@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package indoor_pathfinding.localization;
+
+import "common.proto";
+
+message LocalizationPacket {
+  string session_id = 1;
+  double timestamp = 2;
+  bytes query_image = 3;
+  indoor_pathfinding.common.Intrinsics intrinsics = 4;
+  optional LocalizationHint hint = 5;
+}
+
+message LocalizationHint {
+  oneof hint {
+    indoor_pathfinding.common.Vector3 last_position = 1;
+    string keyframe_id = 2;
+  }
+}

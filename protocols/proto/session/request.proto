@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package indoor_pathfinding.session;
+
+message StartSession {
+  string session_id = 1;
+  SessionConfig config = 2;
+}
+
+message SessionConfig {
+  double camera_fps = 1;
+  double imu_rate = 2;
+  bool enable_recording = 3;
+}
+
+message StopSession {
+  string session_id = 1;
+}
+
+message GetStatusRequest {}

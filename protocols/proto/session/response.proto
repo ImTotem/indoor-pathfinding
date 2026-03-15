@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package indoor_pathfinding.session;
+
+message SessionResponse {
+  string session_id = 1;
+  SessionState state = 2;
+  string message = 3;
+}
+
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_IDLE = 1;
+  SESSION_STATE_ACTIVE = 2;
+  SESSION_STATE_STOPPING = 3;
+  SESSION_STATE_ERROR = 4;
+}

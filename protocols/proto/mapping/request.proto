@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package indoor_pathfinding.mapping;
+
+import "common.proto";
+
+message MappingPacket {
+  string session_id = 1;
+  double timestamp = 2;
+  bytes image_data = 3;
+  repeated ImuData imu_data = 4;
+  indoor_pathfinding.common.Intrinsics intrinsics = 5;
+}
+
+message ImuData {
+  double timestamp = 1;
+  indoor_pathfinding.common.Vector3 acceleration = 2;
+  indoor_pathfinding.common.Vector3 angular_velocity = 3;
+}
