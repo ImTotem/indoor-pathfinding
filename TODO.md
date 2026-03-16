@@ -23,9 +23,13 @@
 | Flutter — 카메라 화면 (프리뷰, 녹화 시작/일시정지/재개, HUD) | 완료 |
 | Flutter — HUD (캡처FPS, 전송FPS, IMU, 자이로, 기압계, 포즈) | 완료 |
 | Flutter — 종료 모달, 업로드 모달 (드레인 프로그레스), 큐 대기 모달 | 완료 |
+| Flutter — 녹화 카운트다운 모달 (3초, 백그라운드 세션 설정) | 완료 |
 | Flutter — MethodChannel/EventChannel 브릿지 (세션, 카메라, 상태) | 완료 |
 | Gradle — cargo-ndk 자동 크로스 컴파일 + UniFFI 바인딩 생성 | 완료 |
 | PNG → JPEG 전환 (YUV→JPEG 직접 변환, 10배+ 속도 향상) | 완료 |
+| RTT 기반 타임스탬프 보정 (5라운드, CLOCK_BOOTTIME → Unix epoch) | 완료 |
+| Proto — SyncTime, SetTimeOffset RPC 추가 | 완료 |
+| Docker — 멀티스테이지 빌드 (Rust SIGSEGV 회피), Rust 1.93.1 고정 | 완료 |
 
 ## 남은 작업
 
@@ -36,4 +40,4 @@
 | 3 | gateway — SLAM 결과 수신 → gRPC 응답 (Pose) 반환 | 스텁 |
 | 4 | Pathfinding 카메라 화면 — localization 세션 연동 | 미착수 |
 | 5 | 캡처 이미지 회전 보정 — 센서 방향 메타데이터 활용 | 개선 필요 |
-| 6 | PNG 인코딩 최적화 — 서버 측 JPEG→PNG 변환 (SLAM 요구 시) | 미착수 |
+| 6 | SLAM 요구 시 서버 측 JPEG→PNG 변환 | 미착수 |
