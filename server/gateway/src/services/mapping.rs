@@ -47,6 +47,8 @@ impl MappingService for MappingServiceImpl {
                     info!(session = %packet.session_id, offset, "Clock offset 적용");
                 }
 
+                info!(session = %packet.session_id, ts = packet.timestamp, "매핑 패킷 수신");
+
                 let pub_ = manager.publisher();
                 let sid = &packet.session_id;
 

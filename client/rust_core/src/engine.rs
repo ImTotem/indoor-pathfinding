@@ -60,7 +60,7 @@ impl RustCoreEngine {
             }
         }
 
-        let (sensor_tx, sensor_rx) = mpsc::channel(128);
+        let (sensor_tx, sensor_rx) = mpsc::channel(2048);
         let (shutdown_tx, shutdown_rx) = mpsc::channel(1);
 
         // 상태 업데이트
@@ -114,7 +114,7 @@ impl RustCoreEngine {
             }
         }
 
-        let (sensor_tx, sensor_rx) = mpsc::channel(128);
+        let (sensor_tx, sensor_rx) = mpsc::channel(2048);
         let (shutdown_tx, shutdown_rx) = mpsc::channel(1);
 
         {
