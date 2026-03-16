@@ -34,19 +34,28 @@ impl MappingService for MappingServiceImpl {
         let manager = self.manager.clone();
 
         let output = async_stream::try_stream! {
+            let mut offset = 0.0_f64;
+            let mut offset_loaded = false;
+
             while let Some(packet) = stream.message().await? {
                 manager.validate_session(&packet.session_id, SessionType::Mapping).await?;
-                info!(session = %packet.session_id, ts = packet.timestamp, "매핑 패킷 수신");
+
+                // 첫 패킷에서 clock offset 1회 로드
+                if !offset_loaded {
+                    offset = manager.get_clock_offset(&packet.session_id).await.unwrap_or(0.0);
+                    offset_loaded = true;
+                    info!(session = %packet.session_id, offset, "Clock offset 적용");
+                }
 
                 let pub_ = manager.publisher();
                 let sid = &packet.session_id;
 
-                pub_.publish_image(sid, packet.timestamp, &packet.image_data);
+                pub_.publish_image(sid, packet.timestamp + offset, &packet.image_data);
 
                 for imu in &packet.imu_data {
                     let accel = imu.acceleration.as_ref().map(|v| [v.x, v.y, v.z]).unwrap_or_default();
                     let gyro = imu.angular_velocity.as_ref().map(|v| [v.x, v.y, v.z]).unwrap_or_default();
-                    pub_.publish_imu(sid, imu.timestamp, accel, gyro);
+                    pub_.publish_imu(sid, imu.timestamp + offset, accel, gyro);
                 }
 
                 if let Some(intr) = &packet.intrinsics {
@@ -54,7 +63,7 @@ impl MappingService for MappingServiceImpl {
                 }
 
                 if let Some(baro) = &packet.barometer {
-                    pub_.publish_barometer(sid, baro.timestamp, baro.pressure);
+                    pub_.publish_barometer(sid, baro.timestamp + offset, baro.pressure);
                 }
 
                 // TODO: MASt3R-SLAM 결과 수신

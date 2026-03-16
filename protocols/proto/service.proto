@@ -28,4 +28,10 @@ service SessionService {
 
   rpc GetStatus(indoor_pathfinding.session.GetStatusRequest)
       returns (indoor_pathfinding.session.SessionResponse);
+
+  rpc SyncTime(indoor_pathfinding.session.SyncTimeRequest)
+      returns (indoor_pathfinding.session.SyncTimeResponse);
+
+  rpc SetTimeOffset(indoor_pathfinding.session.SetTimeOffsetRequest)
+      returns (indoor_pathfinding.session.SessionResponse);
 }

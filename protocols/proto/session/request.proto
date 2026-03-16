@@ -18,3 +18,13 @@ message StopSessionPacket {
 }
 
 message GetStatusRequest {}
+
+message SyncTimeRequest {
+  string session_id = 1;
+  double client_timestamp = 2;
+}
+
+message SetTimeOffsetRequest {
+  string session_id = 1;
+  double offset_sec = 2;
+}

@@ -7,6 +7,8 @@ use tokio::runtime::Runtime;
 use tokio::sync::mpsc;
 use tracing::{error, info};
 
+use std::time::Instant;
+
 use crate::aggregator::{Aggregator, SensorMsg};
 use crate::grpc_client::{GatewayClient, SessionKind};
 use crate::types::*;
@@ -205,6 +207,11 @@ async fn run_mapping_session(
         .start_session(&map_id, SessionKind::Mapping)
         .await?;
 
+    // RTT 기반 타임스탬프 동기화 (실패해도 세션 계속)
+    if let Err(e) = perform_time_sync(&client, &session_id).await {
+        error!("Time sync failed (using raw timestamps): {}", e);
+    }
+
     let (stream_tx, mut response_stream) = client.open_mapping_stream().await?;
 
     let mut aggregator = Aggregator::new(session_id.clone());
@@ -287,6 +294,10 @@ async fn run_localization_session(
         .start_session(&map_id, SessionKind::Localization)
         .await?;
 
+    if let Err(e) = perform_time_sync(&client, &session_id).await {
+        error!("Time sync failed (using raw timestamps): {}", e);
+    }
+
     let (stream_tx, mut response_stream) = client.open_localization_stream().await?;
 
     let mut aggregator = Aggregator::new(session_id.clone());
@@ -350,5 +361,57 @@ async fn run_localization_session(
     }
     info!("Localization session completed: {}", session_id);
 
+    Ok(())
+}
+
+// ── RTT 기반 타임스탬프 동기화 ──
+
+const SYNC_ROUNDS: usize = 5;
+
+/// CLOCK_BOOTTIME 현재 시간 (초) — Android 센서와 동일 클럭
+fn boottime_seconds() -> f64 {
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    unsafe { libc::clock_gettime(libc::CLOCK_BOOTTIME, &mut ts) };
+    ts.tv_sec as f64 + ts.tv_nsec as f64 / 1_000_000_000.0
+}
+
+/// 5라운드 RTT 측정 → 최소 RTT 샘플의 offset 채택 → 서버에 전달
+async fn perform_time_sync(
+    client: &GatewayClient,
+    session_id: &str,
+) -> Result<(), RustCoreError> {
+    let mut best_offset = 0.0_f64;
+    let mut min_rtt = f64::MAX;
+
+    for i in 0..SYNC_ROUNDS {
+        let t1 = Instant::now();
+        let t1_boottime = boottime_seconds();
+        let server_time = client.sync_time(session_id, t1_boottime).await?;
+        let rtt = t1.elapsed().as_secs_f64();
+        let offset = server_time - t1_boottime - rtt / 2.0;
+
+        info!(
+            round = i,
+            rtt_ms = format!("{:.2}", rtt * 1000.0),
+            offset_s = format!("{:.6}", offset),
+            "Time sync"
+        );
+
+        if rtt < min_rtt {
+            min_rtt = rtt;
+            best_offset = offset;
+        }
+    }
+
+    info!(
+        offset_s = format!("{:.6}", best_offset),
+        min_rtt_ms = format!("{:.2}", min_rtt * 1000.0),
+        "Time sync 완료"
+    );
+
+    client.set_time_offset(session_id, best_offset).await?;
     Ok(())
 }

@@ -8,6 +8,10 @@ message SessionResponse {
   string message = 3;
 }
 
+message SyncTimeResponse {
+  double server_timestamp = 1;
+}
+
 enum SessionState {
   SESSION_STATE_UNSPECIFIED = 0;
   SESSION_STATE_IDLE = 1;

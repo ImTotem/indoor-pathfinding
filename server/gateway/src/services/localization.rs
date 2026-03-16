@@ -36,21 +36,29 @@ impl LocalizationService for LocalizationServiceImpl {
         let manager = self.manager.clone();
 
         let output = async_stream::try_stream! {
+            let mut offset = 0.0_f64;
+            let mut offset_loaded = false;
+
             while let Some(packet) = stream.message().await? {
                 manager.validate_session(&packet.session_id, SessionType::Localization).await?;
-                info!(session = %packet.session_id, ts = packet.timestamp, "로컬라이제이션 패킷 수신");
+
+                if !offset_loaded {
+                    offset = manager.get_clock_offset(&packet.session_id).await.unwrap_or(0.0);
+                    offset_loaded = true;
+                    info!(session = %packet.session_id, offset, "Clock offset 적용");
+                }
 
                 let pub_ = manager.publisher();
                 let sid = &packet.session_id;
 
-                pub_.publish_image(sid, packet.timestamp, &packet.query_image);
+                pub_.publish_image(sid, packet.timestamp + offset, &packet.query_image);
 
                 if let Some(intr) = &packet.intrinsics {
                     pub_.publish_camera_info(sid, intr.fx, intr.fy, intr.cx, intr.cy);
                 }
 
                 if let Some(baro) = &packet.barometer {
-                    pub_.publish_barometer(sid, baro.timestamp, baro.pressure);
+                    pub_.publish_barometer(sid, baro.timestamp + offset, baro.pressure);
                 }
 
                 // TODO: RoMa 결과 수신

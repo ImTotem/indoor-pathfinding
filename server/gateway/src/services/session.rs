@@ -5,7 +5,8 @@ use uuid::Uuid;
 
 use indoor_pathfinding_protocols::service::session_service_server::SessionService;
 use indoor_pathfinding_protocols::session::{
-    GetStatusRequest, SessionResponse, SessionState, StartSessionPacket, StopSessionPacket,
+    GetStatusRequest, SessionResponse, SessionState, SetTimeOffsetRequest, StartSessionPacket,
+    StopSessionPacket, SyncTimeRequest, SyncTimeResponse,
 };
 
 use crate::session_manager::{SessionManager, SessionType};
@@ -20,7 +21,6 @@ impl SessionServiceImpl {
     }
 }
 
-/// session_id 생성: "s" + 하이픈 없는 UUID (ROS2 토픽 이름 규칙 충족)
 fn generate_session_id() -> String {
     format!("s{}", Uuid::new_v4().simple())
 }
@@ -89,5 +89,42 @@ impl SessionService for SessionServiceImpl {
                 message: "Idle".into(),
             }))
         }
+    }
+
+    async fn sync_time(
+        &self,
+        request: Request<SyncTimeRequest>,
+    ) -> Result<Response<SyncTimeResponse>, Status> {
+        let req = request.into_inner();
+        self.manager
+            .get_session(&req.session_id)
+            .await
+            .ok_or_else(|| Status::not_found("세션을 찾을 수 없습니다"))?;
+
+        let server_timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs_f64();
+
+        Ok(Response::new(SyncTimeResponse { server_timestamp }))
+    }
+
+    async fn set_time_offset(
+        &self,
+        request: Request<SetTimeOffsetRequest>,
+    ) -> Result<Response<SessionResponse>, Status> {
+        let req = request.into_inner();
+        self.manager
+            .set_clock_offset(&req.session_id, req.offset_sec)
+            .await
+            .map_err(|e| Status::not_found(e))?;
+
+        info!(session_id = %req.session_id, offset = req.offset_sec, "Clock offset 설정");
+
+        Ok(Response::new(SessionResponse {
+            session_id: req.session_id,
+            state: SessionState::Active.into(),
+            message: format!("Clock offset: {:.6}s", req.offset_sec),
+        }))
     }
 }

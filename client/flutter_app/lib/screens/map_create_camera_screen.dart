@@ -138,25 +138,127 @@ class _MapCreateCameraScreenState extends State<MapCreateCameraScreen>
       setState(() => _isRecording = true);
     } else {
       if (_mapId == null) return;
-      // UI 즉시 업데이트 → gRPC 연결은 백그라운드에서
-      setState(() {
-        _isRecording = true;
-        _sessionStarted = true;
-      });
-      try {
-        await _sessionService.startMapping(_mapId!);
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isRecording = false;
-            _sessionStarted = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('세션 시작 실패: $e')),
-          );
-        }
-      }
+      _showCountdownModal();
     }
+  }
+
+  void _showCountdownModal() {
+    final c = context.colors;
+    var countdown = 3;
+    var sessionReady = false;
+    String? sessionError;
+    var dismissed = false;
+
+    // 백그라운드에서 세션 시작 (gRPC 연결 + 타임스탬프 동기화)
+    _sessionService.startMapping(_mapId!).then((_) {
+      sessionReady = true;
+    }).catchError((e) {
+      sessionError = e.toString();
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            // 1초 타이머
+            if (countdown > 0 && !dismissed) {
+              Future.delayed(const Duration(seconds: 1), () {
+                if (!dismissed) {
+                  setModalState(() => countdown--);
+                }
+              });
+            }
+
+            // 에러 발생 시
+            if (sessionError != null && !dismissed) {
+              dismissed = true;
+              Future.microtask(() {
+                if (Navigator.canPop(ctx)) Navigator.pop(ctx);
+                if (mounted) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    SnackBar(content: Text('세션 시작 실패: $sessionError')),
+                  );
+                }
+              });
+            }
+
+            // 카운트다운 완료 + 세션 준비 완료
+            if (countdown <= 0 && sessionReady && !dismissed) {
+              dismissed = true;
+              Future.microtask(() {
+                if (Navigator.canPop(ctx)) Navigator.pop(ctx);
+                if (mounted) {
+                  setState(() {
+                    _isRecording = true;
+                    _sessionStarted = true;
+                  });
+                }
+              });
+            }
+
+            return Material(
+              color: Colors.transparent,
+              child: Center(
+                child: Container(
+                  width: 300,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: c.card,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: c.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 32,
+                        spreadRadius: 4,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: c.surfaceAlt,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Icon(Icons.timer,
+                            color: c.accentIndigo, size: 24),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        countdown > 0 ? '$countdown' : '시작!',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w700,
+                          color: c.foreground,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text('녹화가 곧 시작됩니다',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: c.mutedForeground)),
+                      const SizedBox(height: 4),
+                      Text('카메라를 안정적으로 잡아주세요',
+                          style: TextStyle(
+                              fontSize: 12, color: c.mutedForeground)),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _beginExit() {

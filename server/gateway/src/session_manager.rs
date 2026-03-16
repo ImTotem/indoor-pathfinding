@@ -18,6 +18,7 @@ pub struct Session {
     pub session_id: String,
     pub map_id: String,
     pub session_type: SessionType,
+    pub clock_offset_sec: Option<f64>,
 }
 
 pub struct SessionManager {
@@ -63,6 +64,7 @@ impl SessionManager {
             session_id: session_id.clone(),
             map_id,
             session_type,
+            clock_offset_sec: None,
         };
 
         info!(session_id = %session_id, ?session_type, "세션 등록");
@@ -109,6 +111,23 @@ impl SessionManager {
 
     pub async fn get_active_session(&self) -> Option<Session> {
         self.sessions.read().await.values().next().cloned()
+    }
+
+    pub async fn set_clock_offset(&self, session_id: &str, offset: f64) -> Result<(), String> {
+        let mut sessions = self.sessions.write().await;
+        let session = sessions
+            .get_mut(session_id)
+            .ok_or_else(|| format!("세션을 찾을 수 없습니다: {session_id}"))?;
+        session.clock_offset_sec = Some(offset);
+        Ok(())
+    }
+
+    pub async fn get_clock_offset(&self, session_id: &str) -> Option<f64> {
+        self.sessions
+            .read()
+            .await
+            .get(session_id)
+            .and_then(|s| s.clock_offset_sec)
     }
 
     pub fn publisher(&self) -> &Ros2Publisher {

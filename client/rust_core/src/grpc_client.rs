@@ -12,7 +12,9 @@ use indoor_pathfinding_protocols::service::{
     mapping_service_client::MappingServiceClient,
     session_service_client::SessionServiceClient,
 };
-use indoor_pathfinding_protocols::session::{StartSessionPacket, StopSessionPacket};
+use indoor_pathfinding_protocols::session::{
+    SetTimeOffsetRequest, StartSessionPacket, StopSessionPacket, SyncTimeRequest,
+};
 
 use crate::types::RustCoreError;
 
@@ -81,6 +83,46 @@ impl GatewayClient {
                 reason: e.to_string(),
             })?;
         info!("Session stopped: {}", session_id);
+        Ok(())
+    }
+
+    /// SessionService.SyncTime — 단일 RTT 측정
+    pub async fn sync_time(
+        &self,
+        session_id: &str,
+        client_timestamp: f64,
+    ) -> Result<f64, RustCoreError> {
+        let mut client = SessionServiceClient::new(self.channel.clone());
+        let request = SyncTimeRequest {
+            session_id: session_id.to_string(),
+            client_timestamp,
+        };
+        let response = client
+            .sync_time(request)
+            .await
+            .map_err(|e| RustCoreError::GrpcError {
+                reason: e.to_string(),
+            })?;
+        Ok(response.into_inner().server_timestamp)
+    }
+
+    /// SessionService.SetTimeOffset — 계산된 offset을 서버에 전달
+    pub async fn set_time_offset(
+        &self,
+        session_id: &str,
+        offset_sec: f64,
+    ) -> Result<(), RustCoreError> {
+        let mut client = SessionServiceClient::new(self.channel.clone());
+        let request = SetTimeOffsetRequest {
+            session_id: session_id.to_string(),
+            offset_sec,
+        };
+        client
+            .set_time_offset(request)
+            .await
+            .map_err(|e| RustCoreError::GrpcError {
+                reason: e.to_string(),
+            })?;
         Ok(())
     }
 
