@@ -80,8 +80,9 @@ class _MapCreateCameraScreenState extends State<MapCreateCameraScreen>
           .invokeMethod<int>('getRotation');
       if (mounted) {
         final lh = rotation == 3;
+        final degrees = rotation! * 90; // Surface.ROTATION_* → degrees
         setState(() => _isLeftHanded = lh);
-        _cameraChannel.invokeMethod('setFlip', {'flip': lh});
+        _cameraChannel.invokeMethod('setOrientation', {'degrees': degrees});
       }
     } catch (_) {}
   }

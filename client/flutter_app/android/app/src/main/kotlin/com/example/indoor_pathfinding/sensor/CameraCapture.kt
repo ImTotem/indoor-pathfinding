@@ -1,10 +1,7 @@
 package com.example.indoor_pathfinding.sensor
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
-import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.YuvImage
 import android.hardware.camera2.CameraCharacteristics
@@ -33,7 +30,7 @@ class CameraCapture(
     private val analyzerExecutor = Executors.newSingleThreadExecutor()
 
     @Volatile var capturing = false
-    @Volatile var flipImage = false // 왼손 모드일 때 180° 회전
+    @Volatile var deviceOrientation = 90 // 디바이스 회전 각도 (0, 90, 180, 270)
 
     fun startPreview(entry: TextureRegistry.SurfaceTextureEntry) {
         this.textureEntry = entry
@@ -123,29 +120,19 @@ class CameraCapture(
     private fun processFrame(proxy: ImageProxy) {
         try {
             val ts = proxy.imageInfo.timestamp / 1_000_000_000.0
-            var jpeg = yuvToJpeg(proxy)
-            if (flipImage) {
-                jpeg = rotateJpeg(jpeg, 180f)
-            }
+            val jpeg = yuvToJpeg(proxy)
             val i = intrinsics ?: floatArrayOf(
                 proxy.width * 0.9f, proxy.height * 0.9f,
                 proxy.width / 2f, proxy.height / 2f,
             )
-            pushFrame(ts, jpeg, i[0].toDouble(), i[1].toDouble(), i[2].toDouble(), i[3].toDouble())
+            pushFrame(
+                ts, jpeg,
+                i[0].toDouble(), i[1].toDouble(), i[2].toDouble(), i[3].toDouble(),
+                deviceOrientation,
+            )
         } finally {
             proxy.close()
         }
-    }
-
-    private fun rotateJpeg(jpeg: ByteArray, degrees: Float): ByteArray {
-        val bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
-        val matrix = Matrix().apply { postRotate(degrees) }
-        val rotated = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-        bmp.recycle()
-        val out = ByteArrayOutputStream()
-        rotated.compress(Bitmap.CompressFormat.JPEG, 95, out)
-        rotated.recycle()
-        return out.toByteArray()
     }
 
     private fun yuvToJpeg(proxy: ImageProxy): ByteArray {

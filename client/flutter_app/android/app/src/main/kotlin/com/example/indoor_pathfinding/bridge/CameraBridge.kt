@@ -35,9 +35,9 @@ class CameraBridge(
                 entry = null
                 result.success(null)
             }
-            "setFlip" -> {
-                val flip = call.argument<Boolean>("flip") ?: false
-                capture?.flipImage = flip
+            "setOrientation" -> {
+                val degrees = call.argument<Int>("degrees") ?: 90
+                capture?.deviceOrientation = degrees
                 result.success(null)
             }
             "setSensorLandscape" -> {
@@ -56,5 +56,5 @@ class CameraBridge(
 
     fun startCapture() = capture?.startCapture()
     fun stopCapture() = capture?.stopCapture()
-    fun setLeftHanded(left: Boolean) { capture?.flipImage = left }
+    fun setOrientation(degrees: Int) { capture?.deviceOrientation = degrees }
 }

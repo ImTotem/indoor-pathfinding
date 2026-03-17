@@ -11,6 +11,7 @@ message LocalizationPacket {
   indoor_pathfinding.common.Intrinsics intrinsics = 4;
   indoor_pathfinding.common.BarometerData barometer = 5;
   optional LocalizationHint hint = 6;
+  int32 device_orientation = 7; // 디바이스 회전 각도 (0, 90, 180, 270)
 }
 
 message LocalizationHint {

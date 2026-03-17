@@ -44,6 +44,7 @@ pub fn push_frame(
     fy: f64,
     cx: f64,
     cy: f64,
+    device_orientation: i32,
 ) {
     RustCoreEngine::get().push_sensor(SensorMsg::Frame {
         timestamp,
@@ -52,6 +53,7 @@ pub fn push_frame(
         fy,
         cx,
         cy,
+        device_orientation,
     });
 }
 

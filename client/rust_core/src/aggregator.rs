@@ -13,6 +13,7 @@ pub enum SensorMsg {
         fy: f64,
         cx: f64,
         cy: f64,
+        device_orientation: i32,
     },
     Imu {
         timestamp: f64,
@@ -88,6 +89,7 @@ impl Aggregator {
                 fy,
                 cx,
                 cy,
+                device_orientation,
             } => {
                 let packet = MappingPacket {
                     session_id: self.session_id.clone(),
@@ -96,6 +98,7 @@ impl Aggregator {
                     imu_data: std::mem::take(&mut self.imu_buffer),
                     intrinsics: Some(Intrinsics { fx, fy, cx, cy }),
                     barometer: self.latest_baro.clone(),
+                    device_orientation,
                 };
                 Some(packet)
             }
@@ -123,6 +126,7 @@ impl Aggregator {
                 fy,
                 cx,
                 cy,
+                device_orientation,
             } => {
                 let packet = LocalizationPacket {
                     session_id: self.session_id.clone(),
@@ -131,6 +135,7 @@ impl Aggregator {
                     intrinsics: Some(Intrinsics { fx, fy, cx, cy }),
                     barometer: self.latest_baro.clone(),
                     hint: None,
+                    device_orientation,
                 };
                 Some(packet)
             }
