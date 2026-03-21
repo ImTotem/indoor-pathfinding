@@ -35,9 +35,15 @@
 
 | 우선순위 | 작업 | 상태 |
 |---|---|---|
-| 1 | `server/slam` — MASt3R-SLAM + RoMa 어댑터 구현 | 미착수 |
-| 2 | Docker slam 컨테이너 빌드 & 테스트 | 미실행 |
-| 3 | gateway — SLAM 결과 수신 → gRPC 응답 (Pose) 반환 | 스텁 |
+| 1 | `server/slam` — MUSt3R SLAM 어댑터 구현 (`slam.py` 연동) | 미착수 |
+| 2 | Docker slam 컨테이너 빌드 (MUSt3R + CUDA + ROS2) | 미실행 |
+| 3 | gateway — MUSt3R SLAM 결과 수신 → gRPC 응답 (Pose) 반환 | 스텁 |
 | 4 | Pathfinding 카메라 화면 — localization 세션 연동 | 미착수 |
-| 5 | 캡처 이미지 회전 보정 — 센서 방향 메타데이터 활용 | 완료 |
-| 6 | SLAM 요구 시 서버 측 JPEG→PNG 변환 | 미착수 |
+| 5 | SLAM 요구 시 서버 측 JPEG→PNG 변환 | 미착수 |
+
+### SLAM 엔진 선정
+
+- **MUSt3R** (naver/must3r) 채택 — MASt3R 후속, 다층 메모리 메커니즘
+- 근거: SLAM 내장 (`slam.py`), 웹캠 실시간 지원, 멀티뷰 강화, 최신 모델
+- 라이선스: Non-Commercial (졸업작품 용도 OK)
+- DUSt3R → MASt3R → **MUSt3R** 진화 순서
