@@ -5,8 +5,8 @@ use uuid::Uuid;
 
 use indoor_pathfinding_protocols::service::session_service_server::SessionService;
 use indoor_pathfinding_protocols::session::{
-    GetStatusRequest, SessionResponse, SessionState, SetTimeOffsetRequest, StartSessionPacket,
-    StopSessionPacket, SyncTimeRequest, SyncTimeResponse,
+    CleanupStaleRequest, GetStatusRequest, SessionResponse, SessionState, SetTimeOffsetRequest,
+    StartSessionPacket, StopSessionPacket, SyncTimeRequest, SyncTimeResponse,
 };
 
 use crate::session_manager::{SessionManager, SessionType};
@@ -60,16 +60,22 @@ impl SessionService for SessionServiceImpl {
         let req = request.into_inner();
         info!(session_id = %req.session_id, "세션 중지 요청");
 
-        self.manager
-            .stop_session(&req.session_id)
-            .await
-            .map_err(|e| Status::not_found(e))?;
-
-        Ok(Response::new(SessionResponse {
-            session_id: req.session_id,
-            state: SessionState::Idle.into(),
-            message: "Session stopped".into(),
-        }))
+        match self.manager.stop_session(&req.session_id).await {
+            Ok(_) => Ok(Response::new(SessionResponse {
+                session_id: req.session_id,
+                state: SessionState::Idle.into(),
+                message: "Session stopped".into(),
+            })),
+            Err(_) => {
+                // 이미 정리됨 (리퍼 or 스트림 종료) → 멱등 성공
+                info!(session_id = %req.session_id, "세션 이미 정리됨");
+                Ok(Response::new(SessionResponse {
+                    session_id: req.session_id,
+                    state: SessionState::Idle.into(),
+                    message: "Session already stopped".into(),
+                }))
+            }
+        }
     }
 
     async fn get_status(
@@ -125,6 +131,25 @@ impl SessionService for SessionServiceImpl {
             session_id: req.session_id,
             state: SessionState::Active.into(),
             message: format!("Clock offset: {:.6}s", req.offset_sec),
+        }))
+    }
+
+    async fn cleanup_stale(
+        &self,
+        _request: Request<CleanupStaleRequest>,
+    ) -> Result<Response<SessionResponse>, Status> {
+        info!("스테일 세션 정리 요청");
+        let cleaned = self.manager.cleanup_all_sessions().await;
+        let message = if cleaned.is_empty() {
+            "No stale sessions".to_string()
+        } else {
+            format!("Cleaned {} session(s)", cleaned.len())
+        };
+
+        Ok(Response::new(SessionResponse {
+            session_id: String::new(),
+            state: SessionState::Idle.into(),
+            message,
         }))
     }
 }

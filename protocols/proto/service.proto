@@ -34,4 +34,7 @@ service SessionService {
 
   rpc SetTimeOffset(indoor_pathfinding.session.SetTimeOffsetRequest)
       returns (indoor_pathfinding.session.SessionResponse);
+
+  rpc CleanupStale(indoor_pathfinding.session.CleanupStaleRequest)
+      returns (indoor_pathfinding.session.SessionResponse);
 }

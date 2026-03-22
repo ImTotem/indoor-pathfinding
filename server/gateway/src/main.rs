@@ -24,6 +24,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let publisher = Arc::new(Ros2Publisher::new()?);
     let manager = Arc::new(SessionManager::new(publisher));
 
+    // 백그라운드 리퍼 (30초 간격, 120초 무활동 세션 정리)
+    let _reaper = manager.spawn_reaper();
+
     let addr = "[::]:50051".parse()?;
     info!(%addr, "gateway gRPC 서버 시작");
 
@@ -42,6 +45,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             info!("종료 시그널 수신");
         })
         .await?;
+
+    // 서버 종료 → 남은 세션 전부 정리 (rosbag2 SIGINT)
+    info!("서버 종료 중, 남은 세션 정리");
+    manager.cleanup_all_sessions().await;
 
     Ok(())
 }

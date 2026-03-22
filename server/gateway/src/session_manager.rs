@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 use tokio::sync::{Mutex, RwLock};
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::ros2::{Ros2Publisher, Rosbag2Recorder};
 
@@ -19,6 +20,7 @@ pub struct Session {
     pub map_id: String,
     pub session_type: SessionType,
     pub clock_offset_sec: Option<f64>,
+    pub created_at: Instant,
 }
 
 pub struct SessionManager {
@@ -53,7 +55,8 @@ impl SessionManager {
             SessionType::Localization => format!("/slam/localization/{session_id}"),
         };
 
-        self.publisher.create_session_publishers(&session_id, &prefix, session_type);
+        self.publisher
+            .create_session_publishers(&session_id, &prefix, session_type);
 
         self.recorder
             .lock()
@@ -65,6 +68,7 @@ impl SessionManager {
             map_id,
             session_type,
             clock_offset_sec: None,
+            created_at: Instant::now(),
         };
 
         info!(session_id = %session_id, ?session_type, "세션 등록");
@@ -132,5 +136,55 @@ impl SessionManager {
 
     pub fn publisher(&self) -> &Ros2Publisher {
         &self.publisher
+    }
+
+    /// 전체 세션 제거 (서버 종료 시, CleanupStale RPC)
+    pub async fn cleanup_all_sessions(&self) -> Vec<String> {
+        let ids: Vec<String> = self.sessions.read().await.keys().cloned().collect();
+        let mut cleaned = Vec::new();
+        for id in ids {
+            if self.stop_session(&id).await.is_ok() {
+                cleaned.push(id);
+            }
+        }
+        cleaned
+    }
+
+    /// created_at 기준 timeout 초과 세션 정리 (리퍼용)
+    pub async fn reap_inactive_sessions(&self, timeout: Duration) -> Vec<String> {
+        let now = Instant::now();
+        let stale: Vec<String> = {
+            let sessions = self.sessions.read().await;
+            if sessions.is_empty() {
+                return Vec::new();
+            }
+            sessions
+                .values()
+                .filter(|s| now.duration_since(s.created_at) > timeout)
+                .map(|s| s.session_id.clone())
+                .collect()
+        };
+        let mut cleaned = Vec::new();
+        for id in stale {
+            if self.stop_session(&id).await.is_ok() {
+                warn!(session_id = %id, "리퍼에 의해 세션 정리됨");
+                cleaned.push(id);
+            }
+        }
+        cleaned
+    }
+
+    /// 백그라운드 리퍼 태스크 시작 (30초 간격)
+    pub fn spawn_reaper(self: &Arc<Self>) -> tokio::task::JoinHandle<()> {
+        let manager = Arc::clone(self);
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_secs(30));
+            loop {
+                interval.tick().await;
+                manager
+                    .reap_inactive_sessions(Duration::from_secs(120))
+                    .await;
+            }
+        })
     }
 }

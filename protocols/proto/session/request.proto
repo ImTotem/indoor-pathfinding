@@ -28,3 +28,5 @@ message SetTimeOffsetRequest {
   string session_id = 1;
   double offset_sec = 2;
 }
+
+message CleanupStaleRequest {}
