@@ -18,21 +18,28 @@ rustup target add aarch64-linux-android x86_64-linux-android
 
 ## 1. Gateway 서버 실행
 
-### Docker로 실행
+### Gateway 단독 실행 (권장)
 ```bash
 cd ~/git/indoor-pathfinding
 
-# gateway (gRPC + ROS2 + rosbag2)
-docker compose -f docker/docker-compose.yml up slam
+# 빌드 + 실행 (ROS2 + rosbag2 포함)
+docker build -f docker/ros2/ros2.Dockerfile -t indoor-pathfinding-ros2 . && \
+docker run --rm -p 50051:50051 -v ~/docker-data/slam/rosbag2:/workspace/rosbag2 indoor-pathfinding-ros2
+```
 
+### Docker Compose로 실행 (전체 스택)
+```bash
 # API 서버 (맵 CRUD)
 docker compose -f docker/docker-compose.yml up api
+
+# SLAM 컨테이너 (docker/.env의 SLAM_ENGINE에 따라 Dockerfile 선택)
+docker compose -f docker/docker-compose.yml up slam
 ```
 
 gateway: `100.78.78.37:50051` (gRPC)
 API: `100.78.78.37:8000` (REST)
 
-### Gateway 로컬 실행 (ROS2 없이)
+### Gateway 로컬 실행 (ROS2 없이, 개발용)
 ```bash
 cargo run -p gateway
 ```

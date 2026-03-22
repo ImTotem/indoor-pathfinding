@@ -52,7 +52,9 @@ COPY --from=builder /workspace/server/ ./server/
 COPY --from=builder /root/.cargo/registry /root/.cargo/registry
 COPY --from=builder /workspace/server/gateway/target/ ./server/gateway/target/
 
-# ROS2 feature로 재빌드 (r2r 링크만 추가)
+# ROS2 feature로 재빌드 (r2r 추가)
+ENV CARGO_NET_RETRY=10
+ENV CARGO_HTTP_TIMEOUT=600
 RUN . /opt/ros/humble/setup.sh && \
     cd server/gateway && cargo build --release --features ros2
 
