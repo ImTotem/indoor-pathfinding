@@ -19,5 +19,7 @@ async-stream = "0.3"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 uuid = { version = "1", features = ["v4"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde_json = "1"
 r2r = { version = "0.9", optional = true }
 libc = { version = "0.2", optional = true }

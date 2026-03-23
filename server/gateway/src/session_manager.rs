@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::{Mutex, RwLock};
-use tracing::{info, warn};
+use tracing::{error, info, warn};
 
 use crate::ros2::{Ros2Publisher, Rosbag2Recorder};
 
@@ -27,14 +27,20 @@ pub struct SessionManager {
     sessions: RwLock<HashMap<String, Session>>,
     publisher: Arc<Ros2Publisher>,
     recorder: Mutex<Rosbag2Recorder>,
+    slam_client: reqwest::Client,
+    slam_api_url: String,
 }
 
 impl SessionManager {
     pub fn new(publisher: Arc<Ros2Publisher>) -> Self {
+        let slam_api_url =
+            std::env::var("SLAM_API_URL").unwrap_or_else(|_| "http://localhost:8000".to_string());
         Self {
             sessions: RwLock::new(HashMap::new()),
             publisher,
             recorder: Mutex::new(Rosbag2Recorder::new()),
+            slam_client: reqwest::Client::new(),
+            slam_api_url,
         }
     }
 
@@ -63,6 +69,11 @@ impl SessionManager {
             .await
             .start_recording(&session_id, session_type, ROSBAG2_OUTPUT_DIR);
 
+        // SLAM API에 세션 시작 알림 (실패해도 녹화는 계속)
+        if session_type == SessionType::Mapping {
+            self.notify_slam_start(&session_id, &map_id).await;
+        }
+
         let session = Session {
             session_id: session_id.clone(),
             map_id,
@@ -86,6 +97,11 @@ impl SessionManager {
 
         self.publisher.remove_session_publishers(session_id);
         self.recorder.lock().await.stop_recording(session_id);
+
+        // SLAM API에 세션 종료 알림 (결과 저장 트리거)
+        if session.session_type == SessionType::Mapping {
+            self.notify_slam_stop(session_id).await;
+        }
 
         info!(session_id = %session_id, "세션 제거");
         Ok(session)
@@ -138,7 +154,6 @@ impl SessionManager {
         &self.publisher
     }
 
-    /// 전체 세션 제거 (서버 종료 시, CleanupStale RPC)
     pub async fn cleanup_all_sessions(&self) -> Vec<String> {
         let ids: Vec<String> = self.sessions.read().await.keys().cloned().collect();
         let mut cleaned = Vec::new();
@@ -150,7 +165,6 @@ impl SessionManager {
         cleaned
     }
 
-    /// created_at 기준 timeout 초과 세션 정리 (리퍼용)
     pub async fn reap_inactive_sessions(&self, timeout: Duration) -> Vec<String> {
         let now = Instant::now();
         let stale: Vec<String> = {
@@ -174,7 +188,6 @@ impl SessionManager {
         cleaned
     }
 
-    /// 백그라운드 리퍼 태스크 시작 (30초 간격)
     pub fn spawn_reaper(self: &Arc<Self>) -> tokio::task::JoinHandle<()> {
         let manager = Arc::clone(self);
         tokio::spawn(async move {
@@ -186,5 +199,46 @@ impl SessionManager {
                     .await;
             }
         })
+    }
+
+    // ── SLAM API 호출 (graceful — 실패해도 녹화 계속) ──
+
+    async fn notify_slam_start(&self, session_id: &str, map_id: &str) {
+        let url = format!("{}/sessions", self.slam_api_url);
+        match self
+            .slam_client
+            .post(&url)
+            .json(&serde_json::json!({
+                "session_id": session_id,
+                "map_id": map_id,
+            }))
+            .send()
+            .await
+        {
+            Ok(resp) if resp.status().is_success() => {
+                info!(session_id = %session_id, "SLAM 세션 시작 알림 성공");
+            }
+            Ok(resp) => {
+                warn!(session_id = %session_id, status = %resp.status(), "SLAM 세션 시작 알림 실패");
+            }
+            Err(e) => {
+                error!(session_id = %session_id, "SLAM API 연결 실패 (녹화는 계속): {}", e);
+            }
+        }
+    }
+
+    async fn notify_slam_stop(&self, session_id: &str) {
+        let url = format!("{}/sessions/{}", self.slam_api_url, session_id);
+        match self.slam_client.delete(&url).send().await {
+            Ok(resp) if resp.status().is_success() => {
+                info!(session_id = %session_id, "SLAM 세션 종료 알림 성공");
+            }
+            Ok(resp) => {
+                warn!(session_id = %session_id, status = %resp.status(), "SLAM 세션 종료 알림 실패");
+            }
+            Err(e) => {
+                error!(session_id = %session_id, "SLAM API 연결 실패: {}", e);
+            }
+        }
     }
 }
