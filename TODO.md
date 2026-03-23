@@ -30,6 +30,9 @@
 | RTT 기반 타임스탬프 보정 (5라운드, CLOCK_BOOTTIME → Unix epoch) | 완료 |
 | Proto — SyncTime, SetTimeOffset RPC 추가 | 완료 |
 | Docker — 멀티스테이지 빌드 (Rust SIGSEGV 회피), Rust 1.93.1 고정 | 완료 |
+| 세션 구조 개선 — 스트림 끊김 즉시 정리, 리퍼, CleanupStale RPC | 완료 |
+| Proto — CleanupStale RPC, device_orientation 필드 추가 | 완료 |
+| 캡처 이미지 회전 보정 — device_orientation 메타데이터 활용 | 완료 |
 
 ## 남은 작업
 
@@ -40,16 +43,6 @@
 | 3 | gateway — MUSt3R SLAM 결과 수신 → gRPC 응답 (Pose) 반환 | 스텁 |
 | 4 | Pathfinding 카메라 화면 — localization 세션 연동 | 미착수 |
 | 5 | SLAM 요구 시 서버 측 JPEG→PNG 변환 | 미착수 |
-| 6 | 세션 구조 개선 — 비정상 종료 시 세션 잔류 문제 해결 | 미착수 |
-
-### 세션 잔류 문제
-
-- **현상**: 앱이 종료 버튼 없이 종료(크래시, 태스크 킬, 네트워크 끊김)되면 gateway에 세션이 남아있음
-- **영향**: 다음 녹화 시 이전 세션과 충돌하거나, rosbag2 녹화가 계속 실행됨
-- **해결 방안 후보**:
-  - gRPC 스트림 끊김 감지 → 자동 세션 정리
-  - 세션 타임아웃 (일정 시간 패킷 없으면 자동 종료)
-  - 앱 시작 시 기존 세션 정리 요청
 
 ### SLAM 엔진 선정
 
