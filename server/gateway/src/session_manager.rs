@@ -154,6 +154,7 @@ impl SessionManager {
         &self.publisher
     }
 
+    /// 전체 세션 제거 (서버 종료 시, CleanupStale RPC)
     pub async fn cleanup_all_sessions(&self) -> Vec<String> {
         let ids: Vec<String> = self.sessions.read().await.keys().cloned().collect();
         let mut cleaned = Vec::new();
@@ -165,6 +166,7 @@ impl SessionManager {
         cleaned
     }
 
+    /// created_at 기준 timeout 초과 세션 정리 (리퍼용)
     pub async fn reap_inactive_sessions(&self, timeout: Duration) -> Vec<String> {
         let now = Instant::now();
         let stale: Vec<String> = {
@@ -188,6 +190,7 @@ impl SessionManager {
         cleaned
     }
 
+    /// 백그라운드 리퍼 태스크 시작 (30초 간격)
     pub fn spawn_reaper(self: &Arc<Self>) -> tokio::task::JoinHandle<()> {
         let manager = Arc::clone(self);
         tokio::spawn(async move {
