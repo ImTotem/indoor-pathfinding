@@ -32,33 +32,22 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  gateway:
-    build:
-      context: ..
-      dockerfile: docker/ros2/ros2.Dockerfile
-    ports:
-      - "50051:50051"
-    volumes:
-      - ~/docker-data/slam/rosbag2:/workspace/rosbag2
-    environment:
-      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-    restart: unless-stopped
-
   slam:
     build:
       context: ..
       dockerfile: docker/slam/${SLAM_ENGINE}.Dockerfile
     ports:
+      - "50051:50051"
       - "8001:8000"
       - "7860:7860"
       - "8080:8080"
     volumes:
       - ~/docker-data/slam/${SLAM_ENGINE}/maps:/workspace/maps
+      - ~/docker-data/slam/rosbag2:/workspace/rosbag2
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
-      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     deploy:
       resources:
         reservations:
