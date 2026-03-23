@@ -26,9 +26,22 @@ services:
       - ~/docker-data/api:/app/data
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/indoor_pathfinding
+      SLAM_API_URL: http://slam:8001
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/ros2/ros2.Dockerfile
+    ports:
+      - "50051:50051"
+    volumes:
+      - ~/docker-data/slam/rosbag2:/workspace/rosbag2
+    environment:
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     restart: unless-stopped
 
   slam:
@@ -36,16 +49,16 @@ services:
       context: ..
       dockerfile: docker/slam/${SLAM_ENGINE}.Dockerfile
     ports:
-      - "50051:50051"
+      - "8001:8000"
       - "7860:7860"
       - "8080:8080"
     volumes:
       - ~/docker-data/slam/${SLAM_ENGINE}/maps:/workspace/maps
-      - ~/docker-data/slam/${SLAM_ENGINE}/rosbag2:/workspace/rosbag2
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     deploy:
       resources:
         reservations:
