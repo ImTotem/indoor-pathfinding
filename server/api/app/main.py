@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.exception_handlers import register_exception_handlers
-from app.routers import maps
+from app.routers import maps, slam
 
 app = FastAPI(
     title="Indoor Pathfinding API",
@@ -10,6 +10,7 @@ app = FastAPI(
 
 register_exception_handlers(app)
 app.include_router(maps.router, prefix="/api/maps", tags=["maps"])
+app.include_router(slam.router, prefix="/api/slam", tags=["slam"])
 
 
 @app.get("/health")
