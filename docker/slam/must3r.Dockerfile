@@ -34,15 +34,15 @@ RUN uv pip install --system --no-cache \
     xformers --index-url https://download.pytorch.org/whl/cu128
 
 # ── MUSt3R + API 의존성 ──
+ENV UV_HTTP_TIMEOUT=600
 RUN uv pip install --system --no-cache \
     "must3r@git+https://github.com/naver/must3r.git" \
     "fastapi>=0.115.0" "uvicorn[standard]>=0.34.0"
 
-# ── 모델 가중치 ──
+# ── 모델 가중치 (런타임에 볼륨 마운트) ──
+# 빌드 시 다운로드하지 않음 — 실행 시 -v 로 마운트
+# docker run -v /tmp/must3r_weights:/workspace/weights ...
 WORKDIR /workspace/weights
-RUN curl -LO https://download.europe.naverlabs.com/ComputerVision/MUSt3R/MUSt3R_512.pth && \
-    curl -LO https://download.europe.naverlabs.com/ComputerVision/MUSt3R/MUSt3R_512_retrieval_trainingfree.pth && \
-    curl -LO https://download.europe.naverlabs.com/ComputerVision/MUSt3R/MUSt3R_512_retrieval_codebook.pkl
 
 # ── MUSt3R 래퍼 노드 (자주 변경 → 마지막) ──
 WORKDIR /workspace
