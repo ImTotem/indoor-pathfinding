@@ -37,7 +37,8 @@ services:
       dockerfile: docker/slam/${SLAM_ENGINE}.Dockerfile
     ports:
       - "50051:50051"
-      - "8012:8012"
+      - "7860:7860"
+      - "8080:8080"
     volumes:
       - ~/docker-data/slam/${SLAM_ENGINE}/maps:/workspace/maps
       - ~/docker-data/slam/${SLAM_ENGINE}/rosbag2:/workspace/rosbag2
