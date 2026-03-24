@@ -173,14 +173,13 @@ _viser_server = None
 async def visualize_map(map_id: str, port: int = 7860):
     """저장된 맵을 viser로 시각화. 브라우저에서 http://host:{port} 접속."""
     global _viser_server
-    import pickle
     import numpy as np
     import viser
 
     maps_dir = os.getenv("MAPS_DIR", "/workspace/maps")
     map_path = Path(maps_dir) / map_id
     poses_path = map_path / "all_poses.npz"
-    memory_path = map_path / "memory.pkl"
+    pointcloud_path = map_path / "pointcloud.npz"
 
     if not poses_path.exists():
         raise HTTPException(404, f"Map poses not found: {map_id}")
@@ -190,23 +189,13 @@ async def visualize_map(map_id: str, port: int = 7860):
     poses = data["poses"]  # (N, 4, 4)
     positions = poses[:, :3, 3]  # (N, 3) 카메라 위치
 
-    # memory에서 3D 포인트 클라우드 추출 시도
+    # 포인트 클라우드 로드
     pts3d = None
     colors = None
-    if memory_path.exists():
-        try:
-            with open(memory_path, "rb") as f:
-                mem = pickle.load(f)
-            # MUSt3R memory 구조에서 포인트 클라우드 추출
-            if isinstance(mem, tuple) and len(mem) > 0:
-                for item in mem:
-                    if hasattr(item, "shape") and len(getattr(item, "shape", ())) >= 2:
-                        arr = np.array(item)
-                        if arr.ndim >= 2 and arr.shape[-1] == 3:
-                            pts3d = arr.reshape(-1, 3)
-                            break
-        except Exception:
-            pass
+    if pointcloud_path.exists():
+        pc_data = np.load(str(pointcloud_path), allow_pickle=True)
+        pts3d = pc_data["points"] if "points" in pc_data else None
+        colors = pc_data["colors"] if "colors" in pc_data else None
 
     # 이전 서버 종료
     if _viser_server is not None:

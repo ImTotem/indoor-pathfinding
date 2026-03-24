@@ -36,6 +36,8 @@ class SessionState:
     start_time: float = field(default_factory=time.time)
     status: str = "processing"  # loading → processing → saving → completed
     error_message: str | None = None
+    all_pts3d: list = field(default_factory=list)  # 3D 포인트 누적
+    all_colors: list = field(default_factory=list)  # 색상 누적
 
 
 class MUSt3RNode(Node):
@@ -120,6 +122,18 @@ class MUSt3RNode(Node):
         try:
             state.model.write_all_poses(poses_path)
             state.model.save_memory(memory_path)
+
+            # 포인트 클라우드 저장
+            if state.all_pts3d:
+                all_pts = np.concatenate(state.all_pts3d, axis=0)
+                all_col = np.concatenate(state.all_colors, axis=0) if state.all_colors else None
+                pointcloud_path = os.path.join(map_dir, "pointcloud.npz")
+                save_data = {"points": all_pts}
+                if all_col is not None:
+                    save_data["colors"] = all_col
+                np.savez_compressed(pointcloud_path, **save_data)
+                self.get_logger().info(f"Point cloud saved: {len(all_pts)} points")
+
             state.status = "completed"
             self.get_logger().info(
                 f"Session {session_id} saved: {state.frames_processed} frames, "
@@ -180,13 +194,22 @@ class MUSt3RNode(Node):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # MUSt3R 처리
+        # result = (pts3d, colors, depth, conf, focal, w2c, HW, iskeyframe)
         try:
             result = state.model(frame, state.frame_id, cam_id=0)
             state.frame_id += 1
             state.frames_processed += 1
 
-            # result[7] = iskeyframe
-            if len(result) > 7 and result[7]:
+            # pts3d, colors 누적 (키프레임만 저장해서 메모리 절약)
+            pts3d, colors = result[0], result[1]
+            iskeyframe = len(result) > 7 and result[7]
+            if iskeyframe:
                 state.keyframes += 1
+                if pts3d is not None:
+                    pts = np.array(pts3d).reshape(-1, 3) if not isinstance(pts3d, np.ndarray) else pts3d.reshape(-1, 3)
+                    state.all_pts3d.append(pts)
+                if colors is not None:
+                    col = np.array(colors).reshape(-1, 3) if not isinstance(colors, np.ndarray) else colors.reshape(-1, 3)
+                    state.all_colors.append(col)
         except Exception as e:
             self.get_logger().error(f"MUSt3R inference error: {e}")
