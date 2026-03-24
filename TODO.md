@@ -38,11 +38,13 @@
 
 | 우선순위 | 작업 | 상태 |
 |---|---|---|
-| 1 | `server/slam` — MUSt3R SLAM 어댑터 구현 (`slam.py` 연동) | 미착수 |
-| 2 | Docker slam 컨테이너 빌드 (MUSt3R + CUDA + ROS2) | 미실행 |
-| 3 | gateway — MUSt3R SLAM 결과 수신 → gRPC 응답 (Pose) 반환 | 스텁 |
+| ~~1~~ | ~~`server/slam` — MUSt3R SLAM 어댑터 구현 (`slam.py` 연동)~~ | 완료 |
+| ~~2~~ | ~~Docker slam 컨테이너 빌드 (MUSt3R + CUDA + ROS2 Jazzy)~~ | 완료 |
+| ~~3~~ | ~~gateway → SLAM API 세션 시작/종료 HTTP 호출~~ | 완료 |
 | 4 | Pathfinding 카메라 화면 — localization 세션 연동 | 미착수 |
 | 5 | SLAM 요구 시 서버 측 JPEG→PNG 변환 | 미착수 |
+| 6 | MUSt3R 키프레임 수 개선 (현재 113프레임 → 1키프레임) | 조사 필요 |
+| 7 | 세션 분리: 프레임 전송 완료 후 앱 종료, SLAM은 백그라운드 계속 처리 | 미착수 |
 
 ### SLAM 엔진 선정
 
