@@ -24,9 +24,11 @@ services:
       - "8000:8000"
     volumes:
       - ~/docker-data/api:/app/data
+      - ~/docker-data/slam/must3r/maps:/workspace/maps:ro
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/indoor_pathfinding
       SLAM_API_URL: http://slam:8001
+      MAPS_DIR: /workspace/maps
     depends_on:
       postgres:
         condition: service_healthy
