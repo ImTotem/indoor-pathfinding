@@ -24,5 +24,8 @@ class MapResponse(BaseModel):
     latitude: float | None
     longitude: float | None
     created_at: datetime
+    slam_completed: bool = False
+    slam_keyframes: int | None = None
+    slam_frames: int | None = None
 
     model_config = {"from_attributes": True}

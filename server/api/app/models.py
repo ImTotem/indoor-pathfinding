@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, Float, DateTime, func
+from sqlalchemy import Boolean, Integer, String, Float, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -26,3 +26,8 @@ class Map(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    # SLAM 결과 상태
+    slam_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    slam_keyframes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    slam_frames: Mapped[int | None] = mapped_column(Integer, nullable=True)
