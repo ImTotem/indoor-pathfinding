@@ -41,6 +41,9 @@ class SessionState:
 class MUSt3RNode(Node):
     def __init__(self):
         super().__init__("must3r_slam")
+        # rclpy Jazzy 호환: _subscriptions가 dict로 초기화되는 버그 우회
+        if not isinstance(getattr(self, '_subscriptions', None), list):
+            self._subscriptions = []
         self.sessions: dict[str, SessionState] = {}
         self._slam_subs: dict[str, rclpy.subscription.Subscription] = {}
         self._lock = threading.Lock()

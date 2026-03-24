@@ -42,7 +42,7 @@ impl Rosbag2Recorder {
             .args([
                 "-c",
                 &format!(
-                    "source /opt/ros/humble/setup.bash && ros2 bag record -o {} {}",
+                    "source /opt/ros/$ROS_DISTRO/setup.bash && ros2 bag record -o {} {}",
                     output_path,
                     topics.join(" ")
                 ),
