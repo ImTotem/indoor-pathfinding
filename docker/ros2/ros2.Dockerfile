@@ -1,10 +1,15 @@
 # ── Stage 1: Rust 빌드 (순수 Ubuntu) ──
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
-    cmake build-essential git curl unzip libclang-dev pkg-config \
+# 카카오 미러 + 병렬 다운로드
+RUN echo 'Acquire::Queue-Mode "access";' > /etc/apt/apt.conf.d/99parallel && \
+    echo 'Acquire::http::Pipeline-Depth "10";' >> /etc/apt/apt.conf.d/99parallel && \
+    sed -i 's|http://archive.ubuntu.com|http://mirror.kakao.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true && \
+    sed -i 's|http://security.ubuntu.com|http://mirror.kakao.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    cmake build-essential git curl unzip libclang-dev pkg-config ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # protoc
@@ -25,14 +30,19 @@ COPY server/gateway/ ./server/gateway/
 # ROS2 없이 빌드 (noop 퍼블리셔 사용)
 RUN cd server/gateway && cargo build --release
 
-# ── Stage 2: ROS2 런타임 ──
-FROM osrf/ros:humble-desktop-full-jammy
+# ── Stage 2: ROS2 Jazzy 런타임 (Ubuntu 24.04 + Python 3.12) ──
+FROM osrf/ros:jazzy-desktop-full
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+# 카카오 미러 + 병렬 다운로드
+RUN echo 'Acquire::Queue-Mode "access";' > /etc/apt/apt.conf.d/99parallel && \
+    echo 'Acquire::http::Pipeline-Depth "10";' >> /etc/apt/apt.conf.d/99parallel && \
+    sed -i 's|http://archive.ubuntu.com|http://mirror.kakao.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true && \
+    sed -i 's|http://security.ubuntu.com|http://mirror.kakao.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true && \
+    apt-get update && apt-get install -y --no-install-recommends \
     curl unzip libclang-dev \
-    ros-humble-rmw-cyclonedds-cpp \
+    ros-jazzy-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 # protoc (r2r 빌드에 필요)
@@ -55,14 +65,15 @@ COPY --from=builder /workspace/server/gateway/target/ ./server/gateway/target/
 # ROS2 feature로 재빌드 (r2r 추가)
 ENV CARGO_NET_RETRY=10
 ENV CARGO_HTTP_TIMEOUT=600
-RUN . /opt/ros/humble/setup.sh && \
+RUN . /opt/ros/jazzy/setup.sh && \
     cd server/gateway && cargo build --release --features ros2
 
 RUN cp /workspace/server/gateway/target/release/gateway /usr/local/bin/ && \
     rm -rf /workspace/server/gateway/target /root/.cargo/registry
 
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+ENV ROS_DISTRO=jazzy
 
 EXPOSE 50051
 
-CMD ["bash", "-c", ". /opt/ros/humble/setup.bash && gateway"]
+CMD ["bash", "-c", ". /opt/ros/jazzy/setup.bash && gateway"]
