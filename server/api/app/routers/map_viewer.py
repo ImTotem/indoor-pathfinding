@@ -85,7 +85,7 @@ async def export_ply(
 @router.get("/maps/{map_id}/viewer", response_class=HTMLResponse)
 async def viewer(
     map_id: str,
-    sample: int = Query(5_000_000, description="샘플링 포인트 수. 0이면 전부 (PLY 다운로드 권장)."),
+    sample: int = Query(0, description="샘플링 포인트 수. 0이면 브라우저 한계에 맞춰 자동 조정."),
 ):
     """브라우저 3D 포인트 클라우드 뷰어"""
     pc_path = Path(MAPS_DIR) / map_id / "pointcloud.npz"
@@ -94,14 +94,26 @@ async def viewer(
     if not pc_path.exists():
         raise HTTPException(404, f"Point cloud not found: {map_id}")
 
-    ply_url = f"/api/slam/maps/{map_id}/pointcloud.ply?sample={sample}"
+    # 총 포인트 수 확인
+    data = np.load(str(pc_path), allow_pickle=True)
+    total_points = len(data["points"]) if "points" in data else 0
+
+    # 브라우저 WebGL 한계: ~10M 포인트
+    browser_limit = 10_000_000
+    if sample == 0:
+        effective_sample = min(total_points, browser_limit)
+    else:
+        effective_sample = sample
+
+    ply_url = f"/api/slam/maps/{map_id}/pointcloud.ply?sample={effective_sample}"
+    full_ply_url = f"/api/slam/maps/{map_id}/pointcloud.ply?sample=0"
 
     html = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <title>Map Viewer - {map_id[:8]}</title>
-<style>body{{margin:0;overflow:hidden}}canvas{{display:block}}#info{{position:absolute;top:10px;left:10px;color:#fff;font:14px monospace;background:rgba(0,0,0,0.7);padding:8px 12px;border-radius:6px}}</style>
+<style>body{{margin:0;overflow:hidden}}canvas{{display:block}}#info{{position:absolute;top:10px;left:10px;color:#fff;font:14px monospace;background:rgba(0,0,0,0.7);padding:8px 12px;border-radius:6px;max-width:400px}}#info a{{color:#4fc3f7;text-decoration:none}}#info a:hover{{text-decoration:underline}}</style>
 </head>
 <body>
 <div id="info">Loading...</div>
@@ -161,7 +173,11 @@ loader.load('{ply_url}', (geometry) => {{
   controls.update();
 
   const n = geometry.attributes.position.count;
-  info.textContent = n.toLocaleString() + ' points | {map_id[:8]}';
+  const total = {total_points};
+  const sampled = total > n;
+  info.innerHTML = n.toLocaleString() + ' / ' + total.toLocaleString() + ' points | {map_id[:8]}'
+    + (sampled ? '<br>Sampled for browser rendering' : '')
+    + '<br><a href="{full_ply_url}">Download full PLY (' + (total/1e6).toFixed(1) + 'M pts)</a>';
 }}, (xhr) => {{
   info.textContent = 'Loading... ' + Math.round(xhr.loaded/1024/1024) + ' MB';
 }}, (err) => {{
