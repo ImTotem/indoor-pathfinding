@@ -70,6 +70,9 @@ class MUSt3RNode(Node):
             res=self.res,
             device=self.device,
             num_init_frames=2,
+            keyframe_overlap_thr=0.05,  # 낮을수록 키프레임 더 많이 생성
+            min_conf_keyframe=1.5,      # 3D 포인트 신뢰도 임계값
+            overlap_percentile=85,
         )
 
         state = SessionState(
@@ -200,16 +203,18 @@ class MUSt3RNode(Node):
             state.frame_id += 1
             state.frames_processed += 1
 
-            # pts3d, colors 누적 (키프레임만 저장해서 메모리 절약)
+            # pts3d, colors 누적 (모든 프레임에서 수집)
             pts3d, colors = result[0], result[1]
             iskeyframe = len(result) > 7 and result[7]
             if iskeyframe:
                 state.keyframes += 1
-                if pts3d is not None:
-                    pts = np.array(pts3d).reshape(-1, 3) if not isinstance(pts3d, np.ndarray) else pts3d.reshape(-1, 3)
-                    state.all_pts3d.append(pts)
-                if colors is not None:
-                    col = np.array(colors).reshape(-1, 3) if not isinstance(colors, np.ndarray) else colors.reshape(-1, 3)
-                    state.all_colors.append(col)
+
+            # 모든 프레임의 3D 포인트 저장
+            if pts3d is not None:
+                pts = np.array(pts3d).reshape(-1, 3) if not isinstance(pts3d, np.ndarray) else pts3d.reshape(-1, 3)
+                state.all_pts3d.append(pts)
+            if colors is not None:
+                col = np.array(colors).reshape(-1, 3) if not isinstance(colors, np.ndarray) else colors.reshape(-1, 3)
+                state.all_colors.append(col)
         except Exception as e:
             self.get_logger().error(f"MUSt3R inference error: {e}")
