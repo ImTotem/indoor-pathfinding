@@ -197,8 +197,8 @@ async def visualize_map(map_id: str, port: int = 7860):
         pts_raw = pc_data["points"] if "points" in pc_data else None
         col_raw = pc_data["colors"] if "colors" in pc_data else None
         if pts_raw is not None and len(pts_raw) > 0:
-            # 최대 50만 포인트로 서브샘플링
-            max_points = 500_000
+            # 최대 500만 포인트로 서브샘플링
+            max_points = 5_000_000
             if len(pts_raw) > max_points:
                 idx = np.random.choice(len(pts_raw), max_points, replace=False)
                 pts3d = pts_raw[idx]
