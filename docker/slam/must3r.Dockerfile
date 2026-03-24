@@ -44,7 +44,8 @@ ENV UV_HTTP_TIMEOUT=600
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system --break-system-packages \
     "must3r@git+https://github.com/naver/must3r.git" \
-    "fastapi>=0.115.0" "uvicorn[standard]>=0.34.0"
+    "fastapi>=0.115.0" "uvicorn[standard]>=0.34.0" \
+    "mcap" "mcap-ros2-interfaces"
 
 # ── 모델 가중치 (런타임에 볼륨 마운트) ──
 # docker run -v ~/docker-data/slam/must3r/weights:/workspace/weights ...

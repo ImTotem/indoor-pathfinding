@@ -5,6 +5,8 @@ ROS2 노드와 같은 프로세스에서 실행되며, 노드의 세션 관리 �
 """
 
 import os
+import struct
+import subprocess
 import threading
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -129,4 +131,84 @@ async def get_map(map_id: str):
         "created_at": datetime.fromtimestamp(
             poses.stat().st_mtime, tz=timezone.utc
         ).isoformat() if poses.exists() else None,
+    }
+
+
+# ── 시각화 ──
+
+
+def _extract_images_from_mcap(session_id: str, out_dir: Path) -> int:
+    """mcap rosbag2에서 JPEG 이미지 추출"""
+    from mcap.reader import make_reader
+
+    rosbag_dir = Path("/workspace/rosbag2") / session_id
+    mcap_files = list(rosbag_dir.glob("*.mcap"))
+    if not mcap_files:
+        return 0
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    count = 0
+    for mcap_file in mcap_files:
+        with open(mcap_file, "rb") as f:
+            reader = make_reader(f)
+            for schema, channel, message in reader.iter_messages():
+                if "CompressedImage" not in schema.name:
+                    continue
+                # CDR에서 JPEG 시그니처 위치 찾기
+                data = message.data
+                hx = data.hex()
+                idx = hx.find("ffd8ff")
+                if idx < 0:
+                    continue
+                jpeg = bytes.fromhex(hx[idx:])
+                (out_dir / f"frame_{count:05d}.jpeg").write_bytes(jpeg)
+                count += 1
+    return count
+
+
+@app.post("/maps/{map_id}/visualize")
+async def visualize_map(map_id: str, port: int = 7860):
+    """저장된 맵을 MUSt3R GUI로 시각화. 브라우저에서 http://host:{port} 접속."""
+    maps_dir = os.getenv("MAPS_DIR", "/workspace/maps")
+    map_path = Path(maps_dir) / map_id
+    memory_path = map_path / "memory.pkl"
+
+    if not memory_path.exists():
+        raise HTTPException(404, f"Map memory not found: {map_id}")
+
+    # session_id 찾기 — rosbag2 디렉터리에서 이 map_id와 연결된 세션 검색
+    rosbag_dir = Path("/workspace/rosbag2")
+    session_dirs = list(rosbag_dir.iterdir()) if rosbag_dir.exists() else []
+
+    # 이미지 추출 (캐시: 이미 추출되어 있으면 스킵)
+    frames_dir = map_path / "frames"
+    if not frames_dir.exists() or not list(frames_dir.glob("*.jpeg")):
+        # 가장 최근 세션에서 추출 시도
+        extracted = 0
+        for session_dir in sorted(session_dirs, reverse=True):
+            if session_dir.is_dir():
+                extracted = _extract_images_from_mcap(session_dir.name, frames_dir)
+                if extracted > 0:
+                    break
+        if extracted == 0:
+            raise HTTPException(404, "No images found in rosbag2")
+
+    frame_count = len(list(frames_dir.glob("*.jpeg")))
+
+    # MUSt3R SLAM GUI를 백그라운드에서 실행
+    cmd = (
+        f"XFORMERS_DISABLED=1 python3 -m must3r.slam.slam "
+        f"--chkpt {os.getenv('MUST3R_CHKPT', '/workspace/weights/MUSt3R_512.pth')} "
+        f"--input {frames_dir}/*.jpeg "
+        f"--load_memory {memory_path} "
+        f"--gui --res 224"
+    )
+    subprocess.Popen(cmd, shell=True)
+
+    return {
+        "map_id": map_id,
+        "status": "visualizing",
+        "frames": frame_count,
+        "url": f"http://localhost:{port}",
+        "message": f"Open http://localhost:{port} in browser",
     }
