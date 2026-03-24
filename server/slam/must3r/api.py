@@ -200,9 +200,13 @@ async def visualize_map(map_id: str, port: int = 7860):
     # 이전 서버 종료
     if _viser_server is not None:
         try:
-            _viser_server.close()
+            _viser_server.stop()
         except Exception:
-            pass
+            try:
+                _viser_server.close()
+            except Exception:
+                pass
+        _viser_server = None
 
     # viser 서버 시작
     server = viser.ViserServer(host="0.0.0.0", port=port)
