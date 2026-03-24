@@ -166,49 +166,83 @@ def _extract_images_from_mcap(session_id: str, out_dir: Path) -> int:
     return count
 
 
+_viser_server = None
+
+
 @app.post("/maps/{map_id}/visualize")
 async def visualize_map(map_id: str, port: int = 7860):
-    """저장된 맵을 MUSt3R GUI로 시각화. 브라우저에서 http://host:{port} 접속."""
+    """저장된 맵을 viser로 시각화. 브라우저에서 http://host:{port} 접속."""
+    global _viser_server
+    import pickle
+    import numpy as np
+    import viser
+
     maps_dir = os.getenv("MAPS_DIR", "/workspace/maps")
     map_path = Path(maps_dir) / map_id
+    poses_path = map_path / "all_poses.npz"
     memory_path = map_path / "memory.pkl"
 
-    if not memory_path.exists():
-        raise HTTPException(404, f"Map memory not found: {map_id}")
+    if not poses_path.exists():
+        raise HTTPException(404, f"Map poses not found: {map_id}")
 
-    # session_id 찾기 — rosbag2 디렉터리에서 이 map_id와 연결된 세션 검색
-    rosbag_dir = Path("/workspace/rosbag2")
-    session_dirs = list(rosbag_dir.iterdir()) if rosbag_dir.exists() else []
+    # 포즈 로드
+    data = np.load(str(poses_path), allow_pickle=True)
+    poses = data["poses"]  # (N, 4, 4)
+    positions = poses[:, :3, 3]  # (N, 3) 카메라 위치
 
-    # 이미지 추출 (캐시: 이미 추출되어 있으면 스킵)
-    frames_dir = map_path / "frames"
-    if not frames_dir.exists() or not list(frames_dir.glob("*.jpeg")):
-        # 가장 최근 세션에서 추출 시도
-        extracted = 0
-        for session_dir in sorted(session_dirs, reverse=True):
-            if session_dir.is_dir():
-                extracted = _extract_images_from_mcap(session_dir.name, frames_dir)
-                if extracted > 0:
-                    break
-        if extracted == 0:
-            raise HTTPException(404, "No images found in rosbag2")
+    # memory에서 3D 포인트 클라우드 추출 시도
+    pts3d = None
+    colors = None
+    if memory_path.exists():
+        try:
+            with open(memory_path, "rb") as f:
+                mem = pickle.load(f)
+            # MUSt3R memory 구조에서 포인트 클라우드 추출
+            if isinstance(mem, tuple) and len(mem) > 0:
+                for item in mem:
+                    if hasattr(item, "shape") and len(getattr(item, "shape", ())) >= 2:
+                        arr = np.array(item)
+                        if arr.ndim >= 2 and arr.shape[-1] == 3:
+                            pts3d = arr.reshape(-1, 3)
+                            break
+        except Exception:
+            pass
 
-    frame_count = len(list(frames_dir.glob("*.jpeg")))
+    # 이전 서버 종료
+    if _viser_server is not None:
+        try:
+            _viser_server.close()
+        except Exception:
+            pass
 
-    # MUSt3R SLAM GUI를 백그라운드에서 실행
-    cmd = (
-        f"XFORMERS_DISABLED=1 python3 -m must3r.slam.slam "
-        f"--chkpt {os.getenv('MUST3R_CHKPT', '/workspace/weights/MUSt3R_512.pth')} "
-        f"--input {frames_dir}/*.jpeg "
-        f"--load_memory {memory_path} "
-        f"--gui --res 224"
+    # viser 서버 시작
+    server = viser.ViserServer(host="0.0.0.0", port=port)
+    _viser_server = server
+
+    # 카메라 궤적 (녹색 점)
+    scale = 100.0  # MUSt3R 스케일이 매우 작음
+    server.scene.add_point_cloud(
+        "camera_trajectory",
+        points=(positions * scale).astype(np.float32),
+        colors=np.tile([0, 255, 0], (len(positions), 1)).astype(np.uint8),
+        point_size=0.08,
     )
-    subprocess.Popen(cmd, shell=True)
+
+    # 3D 포인트 클라우드 (흰색 점)
+    if pts3d is not None and len(pts3d) > 0:
+        if colors is None:
+            colors = np.tile([200, 200, 200], (len(pts3d), 1)).astype(np.uint8)
+        server.scene.add_point_cloud(
+            "point_cloud",
+            points=(pts3d * scale).astype(np.float32),
+            colors=colors,
+            point_size=0.02,
+        )
 
     return {
         "map_id": map_id,
         "status": "visualizing",
-        "frames": frame_count,
+        "poses": len(positions),
+        "points": len(pts3d) if pts3d is not None else 0,
         "url": f"http://localhost:{port}",
-        "message": f"Open http://localhost:{port} in browser",
     }
