@@ -189,13 +189,23 @@ async def visualize_map(map_id: str, port: int = 7860):
     poses = data["poses"]  # (N, 4, 4)
     positions = poses[:, :3, 3]  # (N, 3) 카메라 위치
 
-    # 포인트 클라우드 로드
+    # 포인트 클라우드 로드 (서브샘플링)
     pts3d = None
     colors = None
     if pointcloud_path.exists():
         pc_data = np.load(str(pointcloud_path), allow_pickle=True)
-        pts3d = pc_data["points"] if "points" in pc_data else None
-        colors = pc_data["colors"] if "colors" in pc_data else None
+        pts_raw = pc_data["points"] if "points" in pc_data else None
+        col_raw = pc_data["colors"] if "colors" in pc_data else None
+        if pts_raw is not None and len(pts_raw) > 0:
+            # 최대 50만 포인트로 서브샘플링
+            max_points = 500_000
+            if len(pts_raw) > max_points:
+                idx = np.random.choice(len(pts_raw), max_points, replace=False)
+                pts3d = pts_raw[idx]
+                colors = col_raw[idx] if col_raw is not None else None
+            else:
+                pts3d = pts_raw
+                colors = col_raw
 
     # 이전 서버 종료
     if _viser_server is not None:
@@ -221,14 +231,19 @@ async def visualize_map(map_id: str, port: int = 7860):
         point_size=0.08,
     )
 
-    # 3D 포인트 클라우드 (흰색 점)
+    # 3D 포인트 클라우드
     if pts3d is not None and len(pts3d) > 0:
         if colors is None:
-            colors = np.tile([200, 200, 200], (len(pts3d), 1)).astype(np.uint8)
+            pc_colors = np.tile([200, 200, 200], (len(pts3d), 1)).astype(np.uint8)
+        elif colors.dtype == np.float32 or colors.dtype == np.float64:
+            # float 0~1 → uint8 0~255
+            pc_colors = (np.clip(colors, 0, 1) * 255).astype(np.uint8)
+        else:
+            pc_colors = colors.astype(np.uint8)
         server.scene.add_point_cloud(
             "point_cloud",
             points=(pts3d * scale).astype(np.float32),
-            colors=colors,
+            colors=pc_colors,
             point_size=0.02,
         )
 
