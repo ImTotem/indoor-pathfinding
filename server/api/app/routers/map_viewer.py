@@ -85,7 +85,7 @@ async def export_ply(
 @router.get("/maps/{map_id}/viewer", response_class=HTMLResponse)
 async def viewer(
     map_id: str,
-    sample: int = Query(0, description="샘플링 포인트 수. 0이면 전부."),
+    sample: int = Query(5_000_000, description="샘플링 포인트 수. 0이면 전부 (PLY 다운로드 권장)."),
 ):
     """브라우저 3D 포인트 클라우드 뷰어"""
     pc_path = Path(MAPS_DIR) / map_id / "pointcloud.npz"
