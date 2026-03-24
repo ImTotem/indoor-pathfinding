@@ -42,7 +42,7 @@ class MUSt3RNode(Node):
     def __init__(self):
         super().__init__("must3r_slam")
         self.sessions: dict[str, SessionState] = {}
-        self._subscriptions: dict[str, rclpy.subscription.Subscription] = {}
+        self._slam_subs: dict[str, rclpy.subscription.Subscription] = {}
         self._lock = threading.Lock()
 
         self.chkpt = os.getenv("MUST3R_CHKPT", "/workspace/weights/MUSt3R_512.pth")
@@ -80,6 +80,9 @@ class MUSt3RNode(Node):
         )
 
         topic = f"/slam/mapping/{session_id}/image/compressed"
+        with self._lock:
+            self.sessions[session_id] = state
+
         sub = self.create_subscription(
             CompressedImage,
             topic,
@@ -88,8 +91,7 @@ class MUSt3RNode(Node):
         )
 
         with self._lock:
-            self.sessions[session_id] = state
-            self._subscriptions[session_id] = sub
+            self._slam_subs[session_id] = sub
 
         self.get_logger().info(f"Session {session_id} started, subscribing to {topic}")
         return state
@@ -97,7 +99,7 @@ class MUSt3RNode(Node):
     def stop_session(self, session_id: str) -> dict:
         with self._lock:
             state = self.sessions.pop(session_id, None)
-            sub = self._subscriptions.pop(session_id, None)
+            sub = self._slam_subs.pop(session_id, None)
 
         if sub is not None:
             self.destroy_subscription(sub)
