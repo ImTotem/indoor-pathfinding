@@ -267,13 +267,17 @@ async fn run_mapping_session(
     }
     info!("Flushed remaining sensor data");
 
-    // 스트림 종료 → 세션 정리
+    // 스트림 종료 → 전송 완료 즉시 Idle (앱 UI 복귀)
     drop(stream_tx);
-    client.stop_session(&session_id).await?;
-
     {
         let mut s = status.lock();
         s.state = SessionState::Idle;
+    }
+    info!("Data transmission completed");
+
+    // 세션 정리 (SLAM 저장 포함) — UI는 이미 복귀됨
+    if let Err(e) = client.stop_session(&session_id).await {
+        error!("Stop session cleanup failed (non-fatal): {}", e);
     }
     info!("Mapping session completed: {}", session_id);
 
@@ -352,12 +356,17 @@ async fn run_localization_session(
     }
     info!("Flushed remaining sensor data");
 
+    // 스트림 종료 → 전송 완료 즉시 Idle (앱 UI 복귀)
     drop(stream_tx);
-    client.stop_session(&session_id).await?;
-
     {
         let mut s = status.lock();
         s.state = SessionState::Idle;
+    }
+    info!("Data transmission completed");
+
+    // 세션 정리 — UI는 이미 복귀됨
+    if let Err(e) = client.stop_session(&session_id).await {
+        error!("Stop session cleanup failed (non-fatal): {}", e);
     }
     info!("Localization session completed: {}", session_id);
 

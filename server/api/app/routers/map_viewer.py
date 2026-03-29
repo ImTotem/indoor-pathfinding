@@ -33,8 +33,8 @@ def _load_pointcloud(map_id: str, sample: int = 0):
     return pts, colors
 
 
-def _to_ply_bytes(pts: np.ndarray, colors: np.ndarray | None) -> bytes:
-    """PLY 바이너리 생성"""
+def _ply_stream(pts: np.ndarray, colors: np.ndarray | None):
+    """PLY 바이너리 스트리밍 생성기"""
     n = len(pts)
     has_color = colors is not None and len(colors) == n
 
@@ -44,24 +44,25 @@ def _to_ply_bytes(pts: np.ndarray, colors: np.ndarray | None) -> bytes:
     if has_color:
         header += "property uchar red\nproperty uchar green\nproperty uchar blue\n"
     header += "end_header\n"
+    yield header.encode("ascii")
 
-    buf = io.BytesIO()
-    buf.write(header.encode("ascii"))
-
+    col_u8 = None
     if has_color:
         if colors.dtype in (np.float32, np.float64):
             col_u8 = (np.clip(colors, 0, 1) * 255).astype(np.uint8)
         else:
             col_u8 = colors.astype(np.uint8)
 
-        for i in range(n):
+    # 청크 단위로 스트리밍 (10000포인트씩)
+    chunk = 10000
+    for start in range(0, n, chunk):
+        end = min(start + chunk, n)
+        buf = io.BytesIO()
+        for i in range(start, end):
             buf.write(struct.pack("<fff", pts[i, 0], pts[i, 1], pts[i, 2]))
-            buf.write(struct.pack("<BBB", col_u8[i, 0], col_u8[i, 1], col_u8[i, 2]))
-    else:
-        for i in range(n):
-            buf.write(struct.pack("<fff", pts[i, 0], pts[i, 1], pts[i, 2]))
-
-    return buf.getvalue()
+            if col_u8 is not None:
+                buf.write(struct.pack("<BBB", col_u8[i, 0], col_u8[i, 1], col_u8[i, 2]))
+        yield buf.getvalue()
 
 
 @router.get("/maps/{map_id}/pointcloud.ply")
@@ -69,14 +70,13 @@ async def export_ply(
     map_id: str,
     sample: int = Query(0, description="샘플링 포인트 수. 0이면 전부."),
 ):
-    """PLY 파일 다운로드"""
+    """PLY 파일 스트리밍 다운로드"""
     pts, colors = _load_pointcloud(map_id, sample)
     if pts is None:
         raise HTTPException(404, f"Point cloud not found: {map_id}")
 
-    ply_bytes = _to_ply_bytes(pts, colors)
     return StreamingResponse(
-        io.BytesIO(ply_bytes),
+        _ply_stream(pts, colors),
         media_type="application/octet-stream",
         headers={"Content-Disposition": f"attachment; filename={map_id}.ply"},
     )

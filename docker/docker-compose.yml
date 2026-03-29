@@ -47,10 +47,13 @@ services:
       - ~/docker-data/slam/${SLAM_ENGINE}/maps:/workspace/maps
       - ~/docker-data/slam/${SLAM_ENGINE}/weights:/workspace/weights
       - ~/docker-data/slam/rosbag2:/workspace/rosbag2
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: 1
     deploy:
       resources:
         reservations:
